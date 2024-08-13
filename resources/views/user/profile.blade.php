@@ -40,10 +40,17 @@
                                 <div class="profile-header">
                                     <!-- BEGIN profile-header-cover -->
                                     <div class="profile-header-cover"
-                                        style="background-image: url('{{ $userDetails->cover_photo ? asset('storage/' . $userDetails->cover_photo) : asset('assets-user/img/default-cover.jpg') }}'); 
+                                        style="
+                                            @if($userDetails->cover_photo)
+                                                background-image: url('{{ asset('storage/' . $userDetails->cover_photo) }}');
+                                            @else
+                                                background-image: url('{{ asset('assets-user/img/default-cover.jpg') }}');
+                                                background-color: #dddddd; 
+                                            @endif
                                             background-size: cover; 
                                             background-position: center;">
                                     </div>
+
                                     <!-- END profile-header-cover -->
                                     <!-- BEGIN profile-header-content -->
                                     <div class="profile-header-content">
