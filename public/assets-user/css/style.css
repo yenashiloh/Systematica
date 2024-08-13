@@ -1232,3 +1232,37 @@ h6 {
   color: #012970;
 }
 
+.upload-button {
+  background-color: rgb(243, 243, 243);
+  height: 60px;
+  display: flex; 
+  align-items: center; 
+  justify-content: center;
+}
+
+.upload-button:hover {
+  background-color: rgb(243, 243, 243);
+}
+
+.follow-button {
+  color: blue;
+  font-size: 12px;
+  padding: 0.2rem 0.5rem;
+  background: none;  
+  border: none;      
+  cursor: pointer;   
+  font-weight:bold;
+}
+
+.no-underline {
+  text-decoration: none;
+  color: inherit; /* Ensures the color is consistent */
+}
+
+.no-underline span {
+  text-decoration: none;
+}
+.icon-comment{
+  font-size: 21px;
+  margin-bottom: 0px;
+}

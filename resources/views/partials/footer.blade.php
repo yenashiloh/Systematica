@@ -1,35 +1,17 @@
-    <!--   Core JS Files   -->
-    <script src="../assets-admin/js/core/jquery-3.7.1.min.js"></script>
-    <script src="../assets-admin/js/core/popper.min.js"></script>
-    <script src="../assets-admin/js/core/bootstrap.min.js"></script>
+  <!-- Vendor JS Files -->
+    <script src="../assets-user/vendor/apexcharts/apexcharts.min.js"></script>
+    <script src="../assets-user/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="../assets-user/vendor/chart.js/chart.umd.js"></script>
+    <script src="../assets-user/vendor/echarts/echarts.min.js"></script>
+    <script src="../assets-user/vendor/quill/quill.js"></script>
+    <script src="../assets-user/vendor/simple-datatables/simple-datatables.js"></script>
+    <script src="../assets-user/vendor/tinymce/tinymce.min.js"></script>
+    <script src="../assets-user/vendor/php-email-form/validate.js"></script>
 
-    <!-- jQuery Scrollbar -->
-    <script src="../assets-admin/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js"></script>
+    <!-- Template Main JS File -->
+    <script src="../assets-user/js/main.js"></script>
+    <!-- SweetAlert CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 
-    <!-- Chart JS -->
-    <script src="../assets-admin/js/plugin/chart.js/chart.min.js"></script>
-
-    <!-- jQuery Sparkline -->
-    <script src="../assets-admin/js/plugin/jquery.sparkline/jquery.sparkline.min.js"></script>
-
-    <!-- Chart Circle -->
-    <script src="../assets-admin/js/plugin/chart-circle/circles.min.js"></script>
-
-    <!-- Datatables -->
-    <script src="../assets-admin/js/plugin/datatables/datatables.min.js"></script>
-
-    <!-- Bootstrap Notify -->
-    <script src="../assets-admin/js/plugin/bootstrap-notify/bootstrap-notify.min.js"></script>
-
-    <!-- jQuery Vector Maps -->
-    <script src="../assets-admin/js/plugin/jsvectormap/jsvectormap.min.js"></script>
-    <script src="../assets-admin/js/plugin/jsvectormap/world.js"></script>
-
-    <!-- Google Maps Plugin -->
-    <script src="../assets-admin/js/plugin/gmaps/gmaps.js"></script>
-
-    <!-- Sweet Alert -->
-    <script src="../assets-admin/js/plugin/sweetalert/sweetalert.min.js"></script>
-
-    <!-- Kaiadmin JS -->
-    <script src="../assets-admin/js/kaiadmin.min.js"></script>
+    <!-- SweetAlert JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
