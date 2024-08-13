@@ -141,7 +141,7 @@
                                 </button>
                                 <div class="col-lg-12">
                                     @if ($posts->isEmpty())
-                                        <div class="alert alert-info">No posts to display.</div>
+                                        {{-- <div class="alert alert-info">No posts to display.</div> --}}
                                     @else
                                         @foreach ($posts as $post)
                                             <div class="card">
