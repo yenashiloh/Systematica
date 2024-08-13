@@ -55,12 +55,19 @@ class FriendController extends Controller
             $query->where('followed_id', $userId);
         })->where('user_id', '!=', $userId)->get();
     
+        // create an associative array to check mutual follows
+        $mutualFollows = $mutualFollowers->keyBy('user_id')->mapWithKeys(function ($item) use ($userId) {
+            return [$item->user_id => $item->isFollowedBy($userId)];
+        });
+    
         return view('user.friends', [
             'userDetails' => $userDetails,
             'mutualFollowers' => $mutualFollowers,
             'userId' => $userId,
+            'mutualFollows' => $mutualFollows,
         ]);
     }
+    
     
     //follow user
     public function follow($userId)
@@ -82,9 +89,5 @@ class FriendController extends Controller
     
         return response()->json(['success' => true]);
     }
-    
-
-     
-     
      
 }

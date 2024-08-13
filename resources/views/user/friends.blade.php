@@ -33,7 +33,8 @@
                                 <div class="card nearby-user mb-3">
                                     <div class="row no-gutters align-items-center">
                                         <div class="col-md-2 image-profile">
-                                            <img src="https://bootdey.com/img/Content/avatar/avatar7.png" alt="user" class="profile-photo-lg">
+                                            <img src="{{ $user->profile_picture ? asset('storage/' . $user->profile_picture) : asset('assets-user/img/none-profile.jpg') }}"
+                                            alt="Profile Picture" class="profile-photo-lg">
                                         </div>
                                         <div class="col-md-7">
                                             <div class="card-body">
@@ -68,10 +69,8 @@
                     </div>
                 </div>
             </div>
-            
-            
-            
         </section>
+        
         
     </main><!-- End #main -->
 
