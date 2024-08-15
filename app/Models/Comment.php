@@ -16,6 +16,7 @@ class Comment extends Model
         'user_id',
         'post_id',
         'content',
+        'parent_id', 
     ];
 
     public function user()
@@ -27,4 +28,20 @@ class Comment extends Model
     {
         return $this->belongsTo(UserPost::class, 'post_id', 'user_post_id');
     }
+
+    public function parent()
+    {
+        return $this->belongsTo(Comment::class, 'parent_id');
+    }
+
+    public function replies()
+    {
+        return $this->hasMany(Comment::class, 'parent_id');
+    }
+
+    public function getCreatedAtHumanAttribute()
+    {
+        return $this->created_at->diffForHumans();
+    }
+
 }

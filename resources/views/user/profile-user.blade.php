@@ -6,13 +6,13 @@
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>Post</title>
+    <title>Profile</title>
 
     @include('partials.links')
 
-    <link href="../assets-user/css/profile.css" rel="stylesheet">
-    <link href="../assets-user/css/post.css" rel="stylesheet">
-    <link href="../assets-user/css/comment.css" rel="stylesheet">
+    <link href="../../assets-user/css/profile.css" rel="stylesheet">
+    <link href="../../assets-user/css/post.css" rel="stylesheet">
+    <link href="../../assets-user/css/comment.css" rel="stylesheet">
 
 </head>
 
@@ -41,31 +41,37 @@
                                     <!-- BEGIN profile-header-cover -->
                                     <div class="profile-header-cover"
                                         style="
-                                            @if ($userDetails->cover_photo) background-image: url('{{ asset('storage/' . $userDetails->cover_photo) }}');
-                                            @else
+                                            @if ($userDetails->cover_photo) 
+                                                background-image: url('{{ asset('storage/' . $userDetails->cover_photo) }}');
+                                            @else 
                                                 background-image: url('{{ asset('assets-user/img/default-cover.jpg') }}');
-                                                background-color: #dddddd; @endif
+                                                background-color: #dddddd; 
+                                            @endif
                                             background-size: cover; 
                                             background-position: center;">
                                     </div>
-
                                     <!-- END profile-header-cover -->
+
                                     <!-- BEGIN profile-header-content -->
                                     <div class="profile-header-content">
                                         <!-- BEGIN profile-header-img -->
-
                                         <div class="profile-header-img" style="margin-top: 80px;">
-                                            <img src="{{ auth()->user()->profile_picture ? asset('storage/' . auth()->user()->profile_picture) : asset('assets-user/img/none-profile.jpg') }}"
+                                            <img src="{{ $userDetails->profile_picture ? asset('storage/' . $userDetails->profile_picture) : asset('assets-user/img/none-profile.jpg') }}"
                                                 alt="Profile Picture">
                                         </div>
                                         <!-- END profile-header-img -->
+
                                         <!-- BEGIN profile-header-info -->
                                         <div class="profile-header-info">
                                             <h4 class="name-user" style="color: black; font-weight:bold;">
-                                                {{ $userDetails->first_name }}
-                                                {{ $userDetails->last_name }}</h4>
-                                            <a href="{{ route('user.edit-profile') }}" class="btn btn-primary mb-2">Edit
-                                                Profile</a>
+                                                {{ $userDetails->first_name }} {{ $userDetails->last_name }}
+                                            </h4>
+                                            <a href="javascript:void(0);" class="btn btn-primary follow-btn" 
+                                            data-user-id="{{ $userDetails->user_id }}">
+                                             {{ $isFollowing ? 'Following' : 'Follow' }}
+                                         </a>
+                                            
+                                            
                                         </div>
                                         <!-- END profile-header-info -->
                                     </div>
@@ -82,58 +88,8 @@
                                     </ul>
                                     <!-- END profile-header-tab -->
                                 </div>
-                                <div class="card" style="margin-top: 20px;">
-                                    <button type="button" class="btn w-100" data-bs-toggle="modal"
-                                        data-bs-target="#onYourMindModal"
-                                        style="background-color: rgb(224, 224, 224); height: 50px;">
-                                        What's on your mind?
-                                    </button>
-                                    <div class="modal fade" id="onYourMindModal" tabindex="-1">
-                                        <div class="modal-dialog">
-                                            <div class="modal-content">
-                                                <div class="modal-header text-center">
-                                                    <h5 class="modal-title w-100" style="font-weight: bold;">Create a
-                                                        new post</h5>
-                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                        aria-label="Close"></button>
-                                                </div>
-                                                <div class="modal-body">
-                                                    <!-- Text Field -->
-                                                    <form action="{{ route('posts.store') }}" method="POST"
-                                                        enctype="multipart/form-data">
-                                                        @csrf
-                                                        <!-- Privacy Settings -->
-                                                        <div class="mb-3">
-                                                            <label for="privacy" class="form-label">Who can see your
-                                                                post?</label>
-                                                            <select class="form-select" id="privacy" name="privacy">
-                                                                <option value="Public" selected>Public</option>
-                                                                <option value="Friends">Friends</option>
-                                                                <option value="Only Me">Only Me</option>
-                                                            </select>
-                                                        </div>
-                                                        <div class="mb-3">
-                                                            <textarea class="form-control" id="postText" name="caption" rows="4" placeholder="What's on your mind?"
-                                                                style="background-color: rgb(243, 243, 243);"></textarea>
-                                                        </div>
-                                                        <!-- Upload Photo Button -->
-                                                        <div class="mb-3">
-                                                            <button type="button" class="btn upload-button w-100"
-                                                                id="uploadPhotoBtn">
-                                                                Upload Photo
-                                                            </button>
-                                                            <input type="file" id="fileInput" name="image"
-                                                                accept="image/*" style="display: none;">
-                                                        </div>
-                                                        <!-- Buttons -->
-                                                        <div class="d-grid gap-2">
-                                                            <button type="submit" class="btn btn-primary">Post</button>
-                                                        </div>
-                                                    </form>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div><!-- End Basic Modal-->
+                                <div class="card" >
+                                   
                                 </div>
 
                                 </button>
@@ -141,13 +97,16 @@
                                     @if ($posts->isEmpty())
                                         {{-- <div class="alert alert-info">No posts to display.</div> --}}
                                     @else
-                                        @foreach ($posts as $post)
+                                    @foreach ($posts as $post)
+                                    @if ($post->privacy === 'Public' || 
+                                        ($post->privacy === 'Friends' && Auth::user()->isFollowing($post->user_id) && $post->user->isFollowing(Auth::id())))
+                                        <div class="post">
                                             <div class="card">
                                                 <div class="card-body">
                                                     <!-- Post Header -->
                                                     <div class="d-flex align-items-center">
                                                         <!-- Profile Picture -->
-                                                        <img src="{{ auth()->user()->profile_picture ? asset('storage/' . auth()->user()->profile_picture) : asset('assets-user/img/none-profile.jpg') }}"
+                                                            <img src="{{ $userDetails->profile_picture ? asset('storage/' . $userDetails->profile_picture) : asset('assets-user/img/none-profile.jpg') }}"
                                                             alt="Profile Picture" class="rounded-circle-profile"
                                                             style="width: 50px; height: 50px; object-fit: cover;">
 
@@ -159,7 +118,8 @@
                                                                     <div
                                                                         class="d-flex justify-content-between align-items-center">
                                                                         <strong
-                                                                            class="d-block mt-2">{{ $post->user->username }}</strong>
+                                                                            class="d-block mt-2">{{ $post->user->first_name }}
+                                                                            {{ $post->user->last_name }}</strong>
                                                                     </div>
                                                                     <div class="text-muted" style="font-size:13px;">
                                                                         {{ $post->created_at->diffForHumans() }}
@@ -175,36 +135,8 @@
                                                                         @endif
                                                                     </div>
                                                                 </div>
-
                                                                 <!-- Ellipsis Button -->
                                                                 <div class="dropdown">
-                                                                    <button class="btn btn-link" type="button"
-                                                                        id="dropdownMenuButton-{{ $post->id }}"
-                                                                        data-bs-toggle="dropdown"
-                                                                        aria-expanded="false">
-                                                                        <i class="fa-solid fa-ellipsis"></i>
-                                                                    </button>
-                                                                    <ul class="dropdown-menu"
-                                                                        aria-labelledby="dropdownMenuButton-{{ $post->id }}">
-                                                                        <li>
-                                                                            <a class="dropdown-item edit-post-btn"
-                                                                                data-post-id="{{ $post->user_post_id }}"
-                                                                                data-caption="{{ $post->caption }}"
-                                                                                data-image-url="{{ asset('storage/' . $post->image) }}"
-                                                                                data-privacy="{{ $post->privacy }}"
-                                                                                data-first-name="{{ $post->user->first_name ?? 'N/A' }}"
-                                                                                data-last-name="{{ $post->user->last_name ?? 'N/A' }}">
-                                                                                <i class="fas fa-edit"></i> Edit
-                                                                            </a>
-                                                                        </li>
-                                                                        <li>
-                                                                            <a class="dropdown-item deletePostBtn"
-                                                                                href="#"
-                                                                                data-id="{{ $post->user_post_id }}">
-                                                                                <i class="fas fa-trash"></i> Delete
-                                                                            </a>
-                                                                        </li>
-                                                                    </ul>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -245,22 +177,19 @@
                                                             </button>
                                                         </div>
 
-                                                        <div class="collapse mt-3"
-                                                            id="comments-{{ $post->user_post_id }}">
+                                                        <div class="collapse mt-3" id="comments-{{ $post->user_post_id }}">
                                                             <div class="comments-container">
                                                                 <h6>Comments</h6>
                                                                 <hr>
                                                                 <!-- Loop through comments -->
-                                                                @foreach ($post->comments as $comment)
+                                                                @foreach ($post->comments->whereNull('parent_id') as $comment)
                                                                     <div class="comment d-flex mb-2 p-2 border-bottom">
                                                                         <img src="{{ $comment->user->profile_picture ? asset('storage/' . $comment->user->profile_picture) : asset('assets-user/img/none-profile.jpg') }}"
-                                                                            alt="Profile Picture"
-                                                                            class="rounded-circle small-img">
-                                                                        <div class="ms-2">
-                                                                            <strong>{{ $comment->user->username }}</strong>
-                                                                            <div class="text-muted" style="font-size: 13px;">{{ $comment->created_at->diffForHumans() }}</div>
-                                                                            <p class="mb-1">{{ $comment->content }}
-                                                                            </p>
+                                                                            alt="Profile Picture" class="rounded-circle small-img">
+                                                                        <div class="ms-2 w-100">
+                                                                            <strong>{{ $comment->user->first_name }}
+                                                                                {{ $comment->user->last_name }}</strong>
+                                                                            <p class="mb-1">{{ $comment->content }}</p>
                                                                             <button class="btn btn-link btn-sm reply-btn" data-comment-id="{{ $comment->comment_id }}">Reply</button>
                                                                             <div class="reply-form-container" style="display: none;"></div>
                                                                             <div class="replies-container mt-2">
@@ -275,27 +204,24 @@
                                                                     </div>
                                                                 @endforeach
                                                             </div>
-                                                  
-                                                        <!-- Add Comment Form -->
-                                                        <div class="mt-3">
-                                                            <form method="POST"
-                                                                action="{{ route('comments.store') }}"
-                                                                class="d-flex mt-3 comment-form"
-                                                                data-comment-url="{{ route('comments.store') }}">
-                                                                @csrf
-                                                                <input type="hidden" name="post_id"
-                                                                    value="{{ $post->user_post_id }}">
-                                                                <input type="text" class="form-control me-2"
-                                                                    name="content" placeholder="Add a comment..."
-                                                                    required>
-                                                                <button class="btn btn-primary"
-                                                                    type="submit">Post</button>
-                                                            </form>
+                                                        
+                                                            <!-- Add Comment Form -->
+                                                            <div class="mt-3">
+                                                                <form method="POST" action="{{ route('comments.store') }}"
+                                                                    class="d-flex mt-3 comment-form"
+                                                                    data-comment-url="{{ route('comments.store') }}">
+                                                                    @csrf
+                                                                    <input type="hidden" name="post_id" value="{{ $post->user_post_id }}">
+                                                                    <input type="text" class="form-control me-2" name="content"
+                                                                        placeholder="Add a comment..." required>
+                                                                    <button class="btn btn-primary" type="submit">Comment</button>
+                                                                </form>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
-                                </div>
+                                            @endif
                                 @endforeach
                                 @endif
                             </div>
@@ -416,8 +342,6 @@
                     </div>
                 </div>
             </div>
-
-
         </section>
     </main><!-- End #main -->
 
@@ -427,9 +351,38 @@
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     @include('partials.footer')
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="../assets-user/js/user-post.js"></script>
+    <script src="../../assets-user/js/user-post.js"></script>
 
+<script>
+    $(document).ready(function() {
+    $('.follow-btn').click(function() {
+        var userId = $(this).data('user-id');
+        var isFollowing = $(this).text().trim() === 'Following';
+        var url = isFollowing ? '{{ route("unfollow", ":id") }}' : '{{ route("follow", ":id") }}';
+        url = url.replace(':id', userId);
 
+        var button = $(this);
+        
+        $.ajax({
+            url: url,
+            type: 'POST',
+            data: {
+                _token: '{{ csrf_token() }}'
+            },
+            success: function(response) {
+                if (isFollowing) {
+                    button.text('Follow');
+                } else {
+                    button.text('Following');
+                }
+            },
+            error: function(xhr) {
+                console.log(xhr.responseText);
+            }
+        });
+    });
+});
+</script>
 </body>
 
 </html>

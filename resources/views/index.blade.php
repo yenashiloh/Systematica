@@ -42,7 +42,7 @@
                             </div>
                         </div>
                         <button class="buttonvariant4">
-                          <a href="app/signup.html" class="start-your-free">Sign Up</a>
+                          <a href="{{route ('sign-up')}}" class="start-your-free">Sign Up</a>
                         </button>
                     </div>
                 </div>

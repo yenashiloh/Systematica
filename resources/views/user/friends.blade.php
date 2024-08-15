@@ -39,7 +39,9 @@
                                         <div class="col-md-7">
                                             <div class="card-body">
                                                 <h6 class="card-title mb-1">
-                                                    <a href="#" class="profile-link">{{ $user->first_name }} {{ $user->last_name }}</a>
+                                                    <a href="{{ route('user.profile-user', ['id' => $user->user_id]) }}" class="profile-link">
+                                                        {{ $user->first_name }} {{ $user->last_name }}
+                                                    </a>
                                                 </h6>
                                             </div>
                                         </div>

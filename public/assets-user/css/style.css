@@ -1249,7 +1249,7 @@ h6 {
 
 .no-underline {
   text-decoration: none;
-  color: inherit; /* Ensures the color is consistent */
+  color: inherit; 
 }
 
 .no-underline span {
@@ -1258,4 +1258,41 @@ h6 {
 .icon-comment{
   font-size: 21px;
   margin-bottom: 0px;
+}
+.notification-item.unread {
+  background-color: #f1f1f1 !important; 
+}
+#search-results {
+  position: absolute;
+  background: white;
+  width: 26%;
+  /* border: 1px solid #ddd; */
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.user-result {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  cursor: pointer;
+}
+
+.user-result:hover {
+  background-color: #f0f0f0;
+}
+
+.profile-pic {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+
+.username-link {
+  color: #444444 !important;
+}
+
+.username-link:hover {
+  color: #444444 !important; 
 }

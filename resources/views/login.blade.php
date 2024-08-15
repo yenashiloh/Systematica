@@ -52,9 +52,9 @@
                                 </label>
                             </div>
                         </div>
-                        <div class="forgot-password">
+                        {{-- <div class="forgot-password">
                             <a href="" class="forgot-password">Forgot Password?</a>
-                        </div>
+                        </div> --}}
                     </div>
                     <div class="buttons-stack-wrapper">
                         <div class="buttons-stack">
@@ -68,7 +68,7 @@
                                         <div class="placeholder or-text">Or</div>
                                         <div class="frame-child6"></div>
                                     </div>
-                                    <div class="button-wrapper">
+                                    {{-- <div class="button-wrapper">
                                         <button class="likha-button">
                                             <div class="content14">
                                                 <img class="likha-logo" alt=""
@@ -84,7 +84,7 @@
                                                 HypeHive
                                             </div>
                                         </button>
-                                    </div>
+                                    </div> --}}
                                 </div>
                                 <div class="have-no-account-yet-parent">
                                     <div class="placeholder">Have no account yet?</div>

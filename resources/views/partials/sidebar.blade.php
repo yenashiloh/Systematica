@@ -40,11 +40,32 @@
       <li class="nav-item">
         <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: inline;">
             @csrf
-            <button type="submit" class="nav-link {{ Route::currentRouteName() === 'logout' ? '' : 'collapsed' }}">
-                <i class="fas fa-sign-out-alt"></i><span>Logout</span>
+            <button type="button" id="logout-button" class="nav-link {{ Route::currentRouteName() === 'logout' ? '' : 'collapsed' }}">
+                <i class="fas fa-sign-out-alt"></i><span>Log out</span>
             </button>
         </form>
     </li>
     
   </ul>
 </aside>
+
+<script>
+    /**
+ * Logout
+ */
+    document.getElementById('logout-button').addEventListener('click', function() {
+    Swal.fire({
+        title: 'Logout',
+        text: "Are you sure you want to leave this page or logout?",
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Log out'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            document.getElementById('logout-form').submit();
+        }
+    })
+    });
+</script>

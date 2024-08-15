@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Log;
 use App\Models\UserRegistration;
 use App\Models\UserPost;
 use App\Models\UserFollow;
+use App\Models\Notification;
 
 class UserController extends Controller
 {
@@ -84,23 +85,23 @@ class UserController extends Controller
         return redirect()->route('user.home')->with('success', 'Registration successful!');
     }
 
-    // view the home page
     public function homePage()
     {
         // check if the user is authenticated
         if (!auth()->check()) {
             return redirect()->route('login'); // redirect to login page if not authenticated
         }
-        
+
         $userId = auth()->id();
-        
+
+        // fetch user details
         $userDetails = $this->getUserDetails();
-        
+
         // get IDs of users that the current user follows
         $followedUsers = UserFollow::where('follower_id', $userId)
-                                ->pluck('followed_id')
-                                ->toArray();
-        
+                                    ->pluck('followed_id')
+                                    ->toArray();
+
         // retrieve the user's posts with privacy check, including user details, sorted by the latest
         $posts = UserPost::where(function($query) use ($userId, $followedUsers) {
             $query->where('privacy', 'Public')
@@ -120,8 +121,18 @@ class UserController extends Controller
         ->with('user') // eager load the user relationship
         ->orderBy('created_at', 'desc')  // sort by creation date, latest first
         ->get();
-        
-        return view('user.home', compact('userDetails', 'posts', 'followedUsers'));
+
+        // fetch notifications for the authenticated user
+        $notifications = Notification::where('user_id', $userId)
+            ->with(['likedBy', 'commentBy', 'replyBy'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $notificationCount = $notifications->where('status', 'unread')->count();
+
+        $fileUploaded = null;
+
+        return view('user.home', compact('userDetails', 'posts', 'followedUsers', 'fileUploaded', 'notifications', 'notificationCount'));
     }
 
     // check if the username and email already exist
@@ -210,6 +221,8 @@ class UserController extends Controller
         }
     }
 
+
+    //logout
     public function userLogout(Request $request)
     {
         Auth::logout(); // log out the user
@@ -218,7 +231,19 @@ class UserController extends Controller
 
         return redirect()->route('login'); // redirect to the login page
     }
-
     
+    //search user
+    public function search(Request $request)
+    {
+        $query = $request->input('query');
+
+        $results = UserRegistration::where('username', 'LIKE', "%{$query}%")
+                    ->orWhere('first_name', 'LIKE', "%{$query}%")
+                    ->orWhere('last_name', 'LIKE', "%{$query}%")
+                    ->select('user_id', 'username', 'first_name', 'last_name', 'profile_picture')
+                    ->get();
+
+        return response()->json($results);
+    }
     
 }

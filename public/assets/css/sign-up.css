@@ -129,7 +129,9 @@ form small {
 
 .password-container {
   position: relative;
-  width: 97%; /* Ensure the container takes full width of its parent */
+  width: 100%; /* Ensure the container takes full width of its parent */
+  margin-right: 20%;
+
 }
 
 .password-container input {
@@ -139,7 +141,7 @@ form small {
 
 .password-container i {
   position: absolute;
-  right: 25px; /* Position the icon 10px from the right edge of the container */
+  right: 35px; /* Position the icon 10px from the right edge of the container */
   top: 50%;
   transform: translateY(-50%);
   font-size: 16px; /* Adjust font size if needed */

@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Log;
 use App\Models\UserRegistration;
 use App\Models\UserPost;
 use App\Models\UserFollow;
+use App\Models\Notification;
 
 class ProfileController extends Controller
 {
@@ -57,6 +58,16 @@ class ProfileController extends Controller
             ? asset('storage/' . auth()->user()->profile_picture)
             : asset('assets-user/img/none-profile.jpg');
 
+        // calculate the notification count
+        $notificationCount = Notification::where('user_id', $userId)
+            ->where('status', 'unread')
+            ->count();
+
+        // fetch notifications
+        $notifications = Notification::where('user_id', $userId)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
         // pass the data to the view
         return view('user.profile', [
             'userDetails' => $userDetails,
@@ -65,9 +76,58 @@ class ProfileController extends Controller
             'followersCount' => $userDetails->followersCount(),
             'followingCount' => $userDetails->followingCount(),
             'profilePictureUrl' => $profilePictureUrl,
+            'notificationCount' => $notificationCount,
+            'notifications' => $notifications, // add this line
         ]);
     }
 
+    public function viewProfileUser($id)
+    {
+        if (!auth()->check()) {
+            return redirect()->route('login');
+        }
+    
+        // fetch user details based on the provided ID
+        $userDetails = UserRegistration::findOrFail($id);
+    
+        // check if the authenticated user is following this user
+        $isFollowing = auth()->user()->isFollowing($id);
+    
+        // retrieve posts with comments for the user
+        $posts = UserPost::with('comments.user')
+            ->where('user_id', $id) // get posts for the clicked user
+            ->orderBy('created_at', 'desc')
+            ->get();
+    
+        // generate the profile picture URL based on the clicked user's profile picture
+        $profilePictureUrl = $userDetails->profile_picture
+            ? asset('storage/' . $userDetails->profile_picture)
+            : asset('assets-user/img/none-profile.jpg');
+    
+        // calculate the notification count for the authenticated user
+        $notificationCount = Notification::where('user_id', auth()->id())
+            ->where('status', 'unread')
+            ->count();
+    
+        // fetch notifications for the authenticated user
+        $notifications = Notification::where('user_id', auth()->id())
+            ->orderBy('created_at', 'desc')
+            ->get();
+    
+        // return the profile view with all the necessary data
+        return view('user.profile-user', [
+            'userDetails' => $userDetails,
+            'posts' => $posts,
+            'postCount' => $userDetails->postCount(),
+            'followersCount' => $userDetails->followersCount(),
+            'followingCount' => $userDetails->followingCount(),
+            'profilePictureUrl' => $profilePictureUrl,
+            'notificationCount' => $notificationCount,
+            'notifications' => $notifications,
+            'isFollowing' => $isFollowing, 
+        ]);
+    }
+    
     // view edit profile page
     public function editProfilePage()
     {
@@ -78,12 +138,24 @@ class ProfileController extends Controller
         $userId = auth()->id();
         $userDetails = UserRegistration::find($userId);
         
-        // pass user details to the view
+        // calculate the notification count
+        $notificationCount = Notification::where('user_id', $userId)
+            ->where('status', 'unread')
+            ->count();
+    
+        // fetch notifications
+        $notifications = Notification::where('user_id', $userId)
+            ->orderBy('created_at', 'desc')
+            ->get();
+        
+        // pass user details and notification data to the view
         return view('user.edit-profile', [
             'userDetails' => $userDetails,
+            'notificationCount' => $notificationCount,
+            'notifications' => $notifications,
         ]);
     }
-
+    
     // update profile
     public function updateProfile(Request $request)
     {
@@ -162,4 +234,6 @@ class ProfileController extends Controller
 
         return redirect()->route('user.edit-profile')->with('success', 'Profile updated successfully!');
     }
+    
+    
 }

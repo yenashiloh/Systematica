@@ -252,7 +252,6 @@ $(document).ready(function() {
         var postId = form.find('input[name="post_id"]').val();
         var content = form.find('input[name="content"]').val();
         var url = form.data('comment-url');
-
         $.ajax({
             url: url,
             method: 'POST',
@@ -262,25 +261,84 @@ $(document).ready(function() {
                 content: content
             },
             success: function(response) {
-                console.log('Response:', response);
                 if (response.success && response.comment) {
                     var comment = response.comment;
                     var commentHtml = `
-                    <div class="comment d-flex mb-2 p-2 border-bottom">
-                        <img src="../assets-user/img/yena.jpg" alt="User" class="rounded-circle small-img">
+                    <div class="comment d-flex mb-2 p-2 border-bottom" data-comment-id="${comment.comment_id}">
+                        <img src="${comment.user.profile_picture ? '/storage/' + comment.user.profile_picture : '/assets-user/img/none-profile.jpg'}" alt="User" class="rounded-circle small-img">
                         <div class="ms-2">
-                            <strong>${comment.user.first_name || comment.user.firstname} ${comment.user.last_name || comment.user.lastname}</strong>
+                            <strong>${comment.user.username}</strong>
                             <p class="mb-1">${comment.content}</p>
-                            <button class="btn btn-link btn-sm">Reply</button>
+                            <div class="text-muted" style="font-size: 13px;">${comment.created_at_human}</div>
+                            <button class="btn btn-link btn-sm reply-btn" data-comment-id="${comment.comment_id}">Reply</button>
+                            <div class="replies mt-2"></div>
+                            <div class="reply-form d-none">
+                                <form method="POST" action="{{ route('comments.reply', ['comment' => '__COMMENT_ID__']) }}"
+                                    class="d-flex mt-3 reply-form"
+                                    data-reply-url="{{ route('comments.reply', ['comment' => '__COMMENT_ID__']) }}">
+                                    @csrf
+                                    <input type="hidden" name="post_id" value="${postId}">
+                                    <input type="hidden" name="parent_id" value="${comment.comment_id}">
+                                    <input type="text" class="form-control me-2" name="content" placeholder="Add a reply..." required>
+                                    <button class="btn btn-primary" type="submit">Reply</button>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 `;
                     $(`#comments-${postId} .comments-container`).append(commentHtml);
                     form.find('input[name="content"]').val('');
-                    
                     var commentCountEl = form.closest('.collapse').prev().find('button:last-child span');
                     var currentCount = parseInt(commentCountEl.text());
                     commentCountEl.text(currentCount + 1);
+                } else {
+                    console.error('Unexpected response structure:', response);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error:', error);
+                console.log('Status:', status);
+                console.log('Response:', xhr.responseText);
+            }
+        });
+    });
+
+    $(document).on('click', '.reply-btn', function() {
+        var replyForm = $(this).closest('.comment').find('.reply-form');
+        replyForm.toggleClass('d-none');
+    });
+
+    $(document).on('submit', '.reply-form', function(e) {
+        e.preventDefault();
+        var form = $(this);
+        var url = form.attr('action');
+        var postId = form.find('input[name="post_id"]').val();
+        var parentId = form.find('input[name="parent_id"]').val();
+        var content = form.find('input[name="content"]').val();
+
+        $.ajax({
+            url: url,
+            method: 'POST',
+            data: {
+                _token: $('meta[name="csrf-token"]').attr('content'),
+                post_id: postId,
+                parent_id: parentId,
+                content: content
+            },
+            success: function(response) {
+                if (response.success && response.comment) {
+                    var comment = response.comment;
+                    var replyHtml = `
+                        <div class="comment d-flex mb-2 p-2 border-bottom">
+                            <img src="${comment.user.profile_picture ? '/storage/' + comment.user.profile_picture : '/assets-user/img/none-profile.jpg'}" alt="User" class="rounded-circle small-img">
+                            <div class="ms-2">
+                                <strong>${comment.user.username}</strong>
+                                <p class="mb-1">${comment.content}</p>
+                            </div>
+                        </div>
+                    `;
+                    $(form).closest('.comment').find('.replies').append(replyHtml);
+                    form.find('input[name="content"]').val('');
                 } else {
                     console.error('Unexpected response structure:', response);
                 }
@@ -328,3 +386,7 @@ $(document).ready(function() {
         });
     });
 });
+
+/**
+ * search
+ */

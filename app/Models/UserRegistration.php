@@ -148,5 +148,25 @@ class UserRegistration extends Authenticatable
         return $this->belongsToMany(UserRegistration::class, 'user_follows', 'follower_id', 'followed_id');
     }
 
+    public function notificationsReceived()
+    {
+        return $this->hasMany(Notification::class, 'user_id', 'user_id');
+    }
+
+    public function notificationsLiked()
+    {
+        return $this->hasMany(Notification::class, 'liked_by', 'user_id');
+    }
+
+    public function notificationComment()
+    {
+        return $this->hasMany(Notification::class, 'comment_by', 'user_id');
+    }
+
+    public function notificationReply()
+    {
+        return $this->hasMany(Notification::class, 'reply_by', 'user_id');
+    }
+
 }
 

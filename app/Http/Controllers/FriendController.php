@@ -13,6 +13,7 @@ use App\Models\UserRegistration;
 use Illuminate\Support\Facades\Storage;
 use App\Models\UserPost;
 use App\Models\UseFollow;
+use App\Models\Notification;
 
 class FriendController extends Controller
 {
@@ -42,7 +43,7 @@ class FriendController extends Controller
     public function friendsPage()
     {
         if (!auth()->check()) {
-            return redirect()->route('login'); // redirect to login page if not authenticated
+            return redirect()->route('login'); 
         }
     
         $userId = auth()->id();
@@ -60,14 +61,26 @@ class FriendController extends Controller
             return [$item->user_id => $item->isFollowedBy($userId)];
         });
     
+        // calculate the notification count
+        $notificationCount = Notification::where('user_id', $userId)
+            ->where('status', 'unread')
+            ->count();
+    
+        // fetch notifications
+        $notifications = Notification::where('user_id', $userId)
+            ->orderBy('created_at', 'desc')
+            ->get();
+    
+        // pass the data to the view
         return view('user.friends', [
             'userDetails' => $userDetails,
             'mutualFollowers' => $mutualFollowers,
             'userId' => $userId,
             'mutualFollows' => $mutualFollows,
+            'notificationCount' => $notificationCount,
+            'notifications' => $notifications,
         ]);
     }
-    
     
     //follow user
     public function follow($userId)
@@ -76,7 +89,7 @@ class FriendController extends Controller
         if ($user->follow($userId)) {
             return response()->json(['success' => true]);
         }
-        return response()->json(['success' => false], 400); // return 400 Bad Request if follow action fails
+        return response()->json(['success' => false], 400); 
     }
     
     //unfollow user

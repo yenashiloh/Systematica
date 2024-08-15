@@ -6,6 +6,7 @@ use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\FriendController;
+use App\Http\Controllers\NotificationController;
 
 //view welcome page
 Route::get('/', function () {
@@ -34,17 +35,30 @@ Route::middleware(['auth'])->group(function () {
     Route::get('user/profile', [ProfileController::class, 'profilePage'])->name('user.profile'); //view profile page
     Route::get('user/edit-profile', [ProfileController::class, 'editProfilePage'])->name('user.edit-profile'); //view profile page
     Route::post('user/update-profile', [ProfileController::class, 'updateProfile'])->name('user.update-profile');
+    Route::get('user/profile-user/{id}', [ProfileController::class, 'viewProfileUSer'])->name('user.profile-user');
+    
 
     //Comments
     Route::post('/comments', [CommentController::class, 'store'])->name('comments.store'); //store comments
     Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy'); //detele comments
     Route::post('/like/toggle', [CommentController::class, 'toggleLike'])->name('like.toggle'); //like post
+    Route::post('/comments/{comment}/reply', [CommentController::class, 'storeReply'])->name('comments.reply');
+    Route::get('/comments/{comment}/replies', [CommentController::class, 'getReplies'])->name('comments.getReplies');
+    Route::get('/comments/{comment}/reply-count', [CommentController::class, 'getReplyCount'])->name('comments.getReplyCount');
+
+    //Notifications
+    Route::get('/notifications', [CommentController::class, 'showNotifications'])->name('notifications');
+    // Route::post('/notifications/mark-read', [NotificationController::class, 'markAsRead'])->name('notifications.mark-read');
+    Route::get('/notifications/check', [NotificationController::class, 'checkNotifications']);
+    Route::post('/notifications/mark-read', [NotificationController::class, 'markAllAsRead']);
 
     //Friends
     Route::get('user/friends', [FriendController::class, 'friendsPage'])->name('user.friends'); //view friends page
     Route::post('/friends/follow/{userId}', [FriendController::class, 'follow'])->name('friends.follow'); //follow user 
     Route::post('/friends/unfollow/{userId}', [FriendController::class, 'unfollow'])->name('friends.unfollow'); //unfollow user
 
+    //Search User
+    Route::get('/search', [UserController::class, 'search'])->name('search');
 
 });
 

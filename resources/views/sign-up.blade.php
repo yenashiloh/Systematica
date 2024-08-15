@@ -49,7 +49,7 @@
                 <div class="form-group">
                     <label for="password">Password</label>
                     <div class="password-container">
-                        <input type="password" id="password" name="password" placeholder="Enter your password">
+                        <input type="password" id="password" name="password" placeholder="Enter your password" style="margin-right: 20px;">
                         <i id="pass-toggle-btn" class="fa-solid fa-eye"></i>
                     </div>
                 </div>

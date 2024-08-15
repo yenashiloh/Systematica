@@ -34,4 +34,9 @@ class UserPost extends Model
     {
         return $this->hasMany(Like::class, 'post_id');
     }
+    
+    public function notifications()
+    {
+        return $this->hasMany(Notification::class, 'post_id', 'user_post_id');
+    }
 }
