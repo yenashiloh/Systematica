@@ -7,10 +7,9 @@ document.addEventListener('DOMContentLoaded', function () {
             const isFollowing = this.textContent.trim() === 'Following';
 
             if (isFollowing) {
-                // Show SweetAlert confirmation dialog
                 Swal.fire({
-                    title: 'Are you sure?',
-                    text: "You won't be able to follow this user automatically!",
+                    title: 'Unfollow',
+                    text: "Are you sure you want to follow this user?",
                     icon: 'warning',
                     showCancelButton: true,
                     confirmButtonColor: '#3085d6',
@@ -19,7 +18,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     cancelButtonText: 'Cancel'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        // Send the unfollow request
                         fetch(`/friends/unfollow/${userId}`, {
                             method: 'POST',
                             headers: {
@@ -30,7 +28,6 @@ document.addEventListener('DOMContentLoaded', function () {
                         .then(response => response.json())
                         .then(data => {
                             if (data.success) {
-                                // Update the button text to 'Follow'
                                 this.textContent = 'Follow';
                                 Swal.fire(
                                     'Unfollowed!',
@@ -41,12 +38,10 @@ document.addEventListener('DOMContentLoaded', function () {
                         })
                         .catch(error => console.error('Error:', error));
                     } else {
-                        // If the cancel button is clicked, do nothing
-                        event.preventDefault(); // Prevent any default action (though not needed here)
+                        event.preventDefault(); 
                     }
                 });
             } else {
-                // Implement the follow logic here (if needed)
             }
         });
     });

@@ -83,7 +83,6 @@ const handleFormData = async (e) => {
         showError(confirmPassInput, "Please confirm your password");
     }
 
-    // Check for existing username or email
     const csrfTokenElement = document.querySelector('meta[name="csrf-token"]');
     if (!csrfTokenElement) {
         console.error('CSRF token meta tag not found.');
@@ -111,8 +110,6 @@ const handleFormData = async (e) => {
 
     form.submit();
 };
-
-
 
 form.addEventListener("submit", handleFormData);
 
