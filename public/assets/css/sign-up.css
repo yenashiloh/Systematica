@@ -129,26 +129,26 @@ form small {
 
 .password-container {
   position: relative;
-  width: 100%; /* Ensure the container takes full width of its parent */
+  width: 100%;
   margin-right: 20%;
 
 }
 
 .password-container input {
-  padding-right: 50px; /* Ensure text doesn't overlap with the icon */
-  box-sizing: border-box; /* Include padding and border in the width */
+  padding-right: 50px; 
+  box-sizing: border-box; 
 }
 
 .password-container i {
   position: absolute;
-  right: 35px; /* Position the icon 10px from the right edge of the container */
+  right: 35px; 
   top: 50%;
   transform: translateY(-50%);
-  font-size: 16px; /* Adjust font size if needed */
+  font-size: 16px; 
   line-height: 1;
   cursor: pointer;
   color: #939393;
-  pointer-events: auto; /* Ensure the icon is clickable */
+  pointer-events: auto; 
 }
 
 
@@ -213,4 +213,9 @@ form small {
   .submit-btn input {
     width: 100%;
   }
+}
+
+.required-asterisk {
+  color: red;
+
 }

@@ -115,18 +115,29 @@
                                                             </a>
                                                         </strong>
                                                         @if (Auth::check() && Auth::id() !== $post->user_id)
-                                                            @php
-                                                                $isFollowing = in_array($post->user_id, $followedUsers);
-                                                            @endphp
-                                                            <button class="btn follow-button mt-2"
-                                                                data-user-id="{{ $post->user_id }}">
-                                                                {{ $isFollowing ? 'Following' : 'Follow' }}
-                                                            </button>
-                                                        @endif
+                                                        @php
+                                                            $isFollowing = in_array($post->user_id, $followedUsers);
+                                                        @endphp
+                                                        <button class="btn follow-button mt-2" data-user-id="{{ $post->user_id }}">
+                                                            {{ $isFollowing ? 'Following' : 'Follow' }}
+                                                        </button>
+                                                    @endif
+                                                    
                                                     </div>
 
                                                     <div class="text-muted" style="font-size:13px;">
-                                                        {{ $post->created_at->diffForHumans() }}
+                                                        @php
+                                                        $createdAt = $post->created_at;
+                                                        $now = \Carbon\Carbon::now();
+                                                        $oneDayAgo = $now->copy()->subDay();
+                                                    @endphp
+                                                    
+                                                    @if ($createdAt->lessThanOrEqualTo($oneDayAgo))
+                                                        {{ $createdAt->format('F j, Y') }} 
+                                                    @else
+                                                        {{ $createdAt->diffForHumans() }}
+                                                    @endif
+                                                    
                                                         @if ($post->privacy === 'Public')
                                                             <i class="fas fa-globe"
                                                                 style="color: #c0bebe; font-size:12px;"></i>
@@ -223,7 +234,20 @@
                                                             alt="Profile Picture" class="rounded-circle small-img">
                                                         <div class="ms-2 w-100">
                                                             <strong>{{ $comment->user->username }}</strong>
-                                                            <div class="text-muted" style="font-size: 13px;">{{ $comment->created_at->diffForHumans() }}</div>
+                                                            @php
+                                                                $createdAt = $comment->created_at;
+                                                                $now = \Carbon\Carbon::now();
+                                                                $oneDayAgo = $now->copy()->subDay();
+                                                            @endphp
+
+                                                            <div class="text-muted" style="font-size: 13px;">
+                                                                @if ($createdAt->lessThanOrEqualTo($oneDayAgo))
+                                                                    {{ $createdAt->format('F j, Y') }} 
+                                                                @else
+                                                                    {{ $createdAt->diffForHumans() }}
+                                                                @endif
+                                                            </div>
+
                                                             <p class="mb-1">{{ $comment->content }}</p>
                                                             <button class="btn btn-link btn-sm reply-btn" data-comment-id="{{ $comment->comment_id }}">Reply</button>
                                                             
@@ -382,7 +406,7 @@
     @include('partials.footer')
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="../assets-user/js/user-post.js"></script>
-
+    <script src="../assets-user/js/unfollow.js"></script>
 </body>
 
 </html>

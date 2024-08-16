@@ -59,18 +59,17 @@
                                             <img src="{{ $userDetails->profile_picture ? asset('storage/' . $userDetails->profile_picture) : asset('assets-user/img/none-profile.jpg') }}"
                                                 alt="Profile Picture">
                                         </div>
-                                        <!-- END profile-header-img -->
+                                        <!-- END profile-header -img -->
 
                                         <!-- BEGIN profile-header-info -->
                                         <div class="profile-header-info">
                                             <h4 class="name-user" style="color: black; font-weight:bold;">
-                                                {{ $userDetails->first_name }} {{ $userDetails->last_name }}
+                                                {{ $userDetails->username}}
                                             </h4>
                                             <a href="javascript:void(0);" class="btn btn-primary follow-btn" 
                                             data-user-id="{{ $userDetails->user_id }}">
-                                             {{ $isFollowing ? 'Following' : 'Follow' }}
-                                         </a>
-                                            
+                                            {{ $isFollowing ? 'Following' : 'Follow' }}
+                                         </a>                                         
                                             
                                         </div>
                                         <!-- END profile-header-info -->
@@ -79,11 +78,11 @@
 
                                     <!-- BEGIN profile-header-tab -->
                                     <ul class="profile-header-tab nav nav-tabs">
-                                        <li class="nav-item"><a href="#" class="nav-link_">{{ $postCount }}
+                                        <li class="nav-item"><a href="#" class="nav-link_"  style="font-size: 15px;">{{ $postCount }}
                                                 Posts</a></li>
-                                        <li class="nav-item"><a href="#" class="nav-link_">{{ $followersCount }}
+                                        <li class="nav-item"><a href="#" class="nav-link_"  style="font-size: 15px;">{{ $followersCount }}
                                                 Followers</a></li>
-                                        <li class="nav-item"><a href="#" class="nav-link_">{{ $followingCount }}
+                                        <li class="nav-item"><a href="#" class="nav-link_"  style="font-size: 15px;">{{ $followingCount }}
                                                 Following</a></li>
                                     </ul>
                                     <!-- END profile-header-tab -->
@@ -352,6 +351,7 @@
     @include('partials.footer')
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="../../assets-user/js/user-post.js"></script>
+    <script src="../../assets-user/js/unfollow.js"></script>
 
 <script>
     $(document).ready(function() {
