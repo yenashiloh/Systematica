@@ -26,7 +26,8 @@
     @include('partials.sidebar')
     <!-- End Sidebar-->
 
-    <main id="main" class="main">
+    <main id="main" class="main" data-user-id="{{ Auth::id() }}">
+
         <div class="pagetitle">
         </div><!-- End Page Title -->
         <section class="section">
@@ -41,12 +42,10 @@
                                     <!-- BEGIN profile-header-cover -->
                                     <div class="profile-header-cover"
                                         style="
-                                            @if ($userDetails->cover_photo) 
-                                                background-image: url('{{ asset('storage/' . $userDetails->cover_photo) }}');
+                                            @if ($userDetails->cover_photo) background-image: url('{{ asset('storage/' . $userDetails->cover_photo) }}');
                                             @else 
                                                 background-image: url('{{ asset('assets-user/img/default-cover.jpg') }}');
-                                                background-color: #dddddd; 
-                                            @endif
+                                                background-color: #dddddd; @endif
                                             background-size: cover; 
                                             background-position: center;">
                                     </div>
@@ -63,14 +62,16 @@
 
                                         <!-- BEGIN profile-header-info -->
                                         <div class="profile-header-info">
-                                            <h4 class="name-user" style="color: black; font-weight:bold;">
-                                                {{ $userDetails->username}}
+                                            <h4 class="name-user" style="font-weight:bold;">
+                                                <span class="username-background" >
+                                                    {{ $userDetails->username }}
+                                                </span>
                                             </h4>
-                                            <a href="javascript:void(0);" class="btn btn-primary follow-btn" 
-                                            data-user-id="{{ $userDetails->user_id }}">
-                                            {{ $isFollowing ? 'Following' : 'Follow' }}
-                                         </a>                                         
-                                            
+                                            <a href="javascript:void(0);" class="btn btn-primary follow-btn"
+                                                data-user-id="{{ $userDetails->user_id }}">
+                                                {{ $isFollowing ? 'Following' : 'Follow' }}
+                                            </a>
+
                                         </div>
                                         <!-- END profile-header-info -->
                                     </div>
@@ -78,17 +79,20 @@
 
                                     <!-- BEGIN profile-header-tab -->
                                     <ul class="profile-header-tab nav nav-tabs">
-                                        <li class="nav-item"><a href="#" class="nav-link_"  style="font-size: 15px;">{{ $postCount }}
+                                        <li class="nav-item"><a href="#" class="nav-link_"
+                                                style="font-size: 15px;">{{ $postCount }}
                                                 Posts</a></li>
-                                        <li class="nav-item"><a href="#" class="nav-link_"  style="font-size: 15px;">{{ $followersCount }}
+                                        <li class="nav-item"><a href="#" class="nav-link_"
+                                                style="font-size: 15px;">{{ $followersCount }}
                                                 Followers</a></li>
-                                        <li class="nav-item"><a href="#" class="nav-link_"  style="font-size: 15px;">{{ $followingCount }}
+                                        <li class="nav-item"><a href="#" class="nav-link_"
+                                                style="font-size: 15px;">{{ $followingCount }}
                                                 Following</a></li>
                                     </ul>
                                     <!-- END profile-header-tab -->
                                 </div>
-                                <div class="card" >
-                                   
+                                <div class="card">
+
                                 </div>
 
                                 </button>
@@ -96,154 +100,311 @@
                                     @if ($posts->isEmpty())
                                         {{-- <div class="alert alert-info">No posts to display.</div> --}}
                                     @else
-                                    @foreach ($posts as $post)
-                                    @if ($post->privacy === 'Public' || 
-                                        ($post->privacy === 'Friends' && Auth::user()->isFollowing($post->user_id) && $post->user->isFollowing(Auth::id())))
-                                        <div class="post">
-                                            <div class="card">
-                                                <div class="card-body">
-                                                    <!-- Post Header -->
-                                                    <div class="d-flex align-items-center">
-                                                        <!-- Profile Picture -->
-                                                            <img src="{{ $userDetails->profile_picture ? asset('storage/' . $userDetails->profile_picture) : asset('assets-user/img/none-profile.jpg') }}"
-                                                            alt="Profile Picture" class="rounded-circle-profile"
-                                                            style="width: 50px; height: 50px; object-fit: cover;">
+                                        @foreach ($posts as $post)
+                                            @if (
+                                                $post->privacy === 'Public' ||
+                                                    ($post->privacy === 'Friends' &&
+                                                        Auth::user()->isFollowing($post->user_id) &&
+                                                        $post->user->isFollowing(Auth::id())))
+                                                <div class="post">
+                                                    <div class="card">
+                                                        <div class="card-body">
+                                                            <!-- Post Header -->
+                                                            <div class="d-flex align-items-center">
+                                                                <!-- Profile Picture -->
+                                                                <img src="{{ $userDetails->profile_picture ? asset('storage/' . $userDetails->profile_picture) : asset('assets-user/img/none-profile.jpg') }}"
+                                                                    alt="Profile Picture" class="rounded-circle-profile"
+                                                                    style="width: 50px; height: 50px; object-fit: cover;">
 
-                                                        <!-- Post Information -->
-                                                        <div class="ms-3 flex-grow-1">
-                                                            <div
-                                                                class="d-flex justify-content-between align-items-start">
-                                                                <div>
+                                                                <!-- Post Information -->
+                                                                <div class="ms-3 flex-grow-1">
                                                                     <div
-                                                                        class="d-flex justify-content-between align-items-center">
-                                                                        <strong
-                                                                            class="d-block mt-2">{{ $post->user->first_name }}
-                                                                            {{ $post->user->last_name }}</strong>
-                                                                    </div>
-                                                                    <div class="text-muted" style="font-size:13px;">
-                                                                        {{ $post->created_at->diffForHumans() }}
-                                                                        @if ($post->privacy === 'Public')
-                                                                            <i class="fas fa-globe"
-                                                                                style="color: #c0bebe; font-size:12px;"></i>
-                                                                        @elseif ($post->privacy === 'Friends')
-                                                                            <i class="fas fa-user-friends"
-                                                                                style="color: #c0bebe; font-size:10px;"></i>
-                                                                        @elseif ($post->privacy === 'Only Me')
-                                                                            <i class="fas fa-lock"
-                                                                                style="color: #c0bebe; font-size:12px;"></i>
-                                                                        @endif
+                                                                        class="d-flex justify-content-between align-items-start">
+                                                                        <div>
+                                                                            <div
+                                                                                class="d-flex justify-content-between align-items-center">
+                                                                                <strong
+                                                                                    class="d-block mt-2">{{ $post->user->username }}
+                                                                                </strong>
+                                                                            </div>
+                                                                            <div class="text-muted" style="font-size:13px;">
+                                                                                {{ $post->created_at->diffForHumans() }}
+                                                                                @if ($post->privacy === 'Public')
+                                                                                    <i class="fas fa-globe" style="color: #c0bebe; font-size:12px;"></i>
+                                                                                @elseif ($post->privacy === 'Friends')
+                                                                                    <i class="fas fa-user-friends" style="color: #c0bebe; font-size:10px;"></i>
+                                                                                @elseif ($post->privacy === 'Only Me')
+                                                                                    <i class="fas fa-lock" style="color: #c0bebe; font-size:12px;"></i>
+                                                                                @endif
+                                                                            </div>
+                                                                        </div>
+                                                                        <!-- Ellipsis Button -->
+                                                                        <div class="dropdown">
+                                                                        </div>
                                                                     </div>
                                                                 </div>
-                                                                <!-- Ellipsis Button -->
-                                                                <div class="dropdown">
+                                                            </div>
+
+                                                            <!-- Post Content -->
+                                                            <div class="mb-3">
+                                                                <!-- Caption -->
+                                                                <p style="margin-top:20px;">{{ $post->caption }}</p>
+                                                                <!-- Photo -->
+                                                                @if ($post->image)
+                                                                    <div class="card" style="width: 100%;">
+                                                                        <img src="{{ asset('storage/' . $post->image) }}"
+                                                                            alt="Post Photo" class="img-fluid"
+                                                                            style="max-height: 400px; object-fit: contain; width: 100%; height: auto;">
+                                                                    </div>
+                                                                @endif
+                                                                <!-- Icons and Counts -->
+                                                                <div class="d-flex align-items-center mt-3">
+                                                                    <!-- Likes Button and Count -->
+                                                                    <button
+                                                                        class="btn btn-link like-button no-underline"
+                                                                        type="button"
+                                                                        data-post-id="{{ $post->user_post_id }}"
+                                                                        data-url="{{ route('like.toggle') }}">
+                                                                        <i class="icon-comment fa-heart {{ $post->likes->contains('user_id', Auth::id()) ? 'fas' : 'far' }}"
+                                                                            style="{{ $post->likes->contains('user_id', Auth::id()) ? 'color: red;' : 'color: black;' }}"></i>
+                                                                        <span
+                                                                            class="like-count">{{ $post->likes->count() }}</span>
+                                                                    </button>
+
+
+                                                                    <!-- Comments Button and Count -->
+                                                                    <button class="btn btn-link no-underline"
+                                                                        type="button" data-bs-toggle="collapse"
+                                                                        data-bs-target="#comments-{{ $post->user_post_id }}">
+                                                                        <i class="icon-comment fa-regular fa-comment"
+                                                                            style="color: #333;"></i>
+                                                                        <span>{{ $post->comments->count() }}</span>
+                                                                    </button>
                                                                 </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
 
-                                                    <!-- Post Content -->
-                                                    <div class="mb-3">
-                                                        <!-- Caption -->
-                                                        <p style="margin-top:20px;">{{ $post->caption }}</p>
-                                                        <!-- Photo -->
-                                                        @if ($post->image)
-                                                            <div class="card" style="width: 100%;">
-                                                                <img src="{{ asset('storage/' . $post->image) }}"
-                                                                    alt="Post Photo" class="img-fluid"
-                                                                    style="max-height: 400px; object-fit: contain; width: 100%; height: auto;">
-                                                            </div>
-                                                        @endif
-                                                        <!-- Icons and Counts -->
-                                                        <div class="d-flex align-items-center mt-3">
-                                                            <!-- Likes Button and Count -->
-                                                            <button class="btn btn-link like-button no-underline"
-                                                                type="button"
-                                                                data-post-id="{{ $post->user_post_id }}"
-                                                                data-url="{{ route('like.toggle') }}">
-                                                                <i class="icon-comment fa-heart {{ $post->likes->contains('user_id', Auth::id()) ? 'fas' : 'far' }}"
-                                                                    style="{{ $post->likes->contains('user_id', Auth::id()) ? 'color: red;' : 'color: black;' }}"></i>
-                                                                <span
-                                                                    class="like-count">{{ $post->likes->count() }}</span>
-                                                            </button>
 
-                                                            <!-- Comments Button and Count -->
-                                                            <button class="btn btn-link no-underline" type="button"
-                                                                data-bs-toggle="collapse"
-                                                                data-bs-target="#comments-{{ $post->user_post_id }}">
-                                                                <i class="icon-comment fa-regular fa-comment"
-                                                                    style="color: #333;"></i>
-                                                                <span>{{ $post->comments->count() }}</span>
-                                                            </button>
-                                                        </div>
-
-                                                        <div class="collapse mt-3" id="comments-{{ $post->user_post_id }}">
+                                                                
+                                                            <!-- Comments Section -->
+                                                            <div class="collapse mt-3"
+                                                            id="comments-{{ $post->user_post_id }}">
                                                             <div class="comments-container">
                                                                 <h6>Comments</h6>
                                                                 <hr>
                                                                 <!-- Loop through comments -->
                                                                 @foreach ($post->comments->whereNull('parent_id') as $comment)
-                                                                    <div class="comment d-flex mb-2 p-2 border-bottom">
+                                                                    <div class="comment d-flex mb-2 p-2 border-bottom"
+                                                                        data-comment-id="{{ $comment->comment_id }}">
                                                                         <img src="{{ $comment->user->profile_picture ? asset('storage/' . $comment->user->profile_picture) : asset('assets-user/img/none-profile.jpg') }}"
-                                                                            alt="Profile Picture" class="rounded-circle small-img">
+                                                                            alt="Profile Picture"
+                                                                            class="rounded-circle small-img">
                                                                         <div class="ms-2 w-100">
-                                                                            <strong>{{ $comment->user->first_name }}
-                                                                                {{ $comment->user->last_name }}</strong>
-                                                                            <p class="mb-1">{{ $comment->content }}</p>
-                                                                            <button class="btn btn-link btn-sm reply-btn" data-comment-id="{{ $comment->comment_id }}">Reply</button>
-                                                                            <div class="reply-form-container" style="display: none;"></div>
-                                                                            <div class="replies-container mt-2">
-                                                                                @if ($comment->replies->count() > 0)
+                                                                            <div
+                                                                                class="d-flex justify-content-between">
+                                                                                <div>
+                                                                                    <strong>{{ $comment->user->username }}</strong>
+                                                                                    @php
+                                                                                        $createdAt =
+                                                                                            $comment->created_at;
+                                                                                        $now = \Carbon\Carbon::now();
+                                                                                        $oneDayAgo = $now->subDay();
+                                                                                    @endphp
+                                                                                    <div class="text-muted"
+                                                                                        style="font-size: 13px;">
+                                                                                        @if ($createdAt->lessThanOrEqualTo($oneDayAgo))
+                                                                                            {{ $createdAt->format('F j, Y') }}
+                                                                                        @else
+                                                                                            {{ $createdAt->format('F j, Y') }},
+                                                                                            {{ $createdAt->diffForHumans() }}
+                                                                                        @endif
+                                                                                    </div>
+                                                                                </div>
+                                                                                @auth
+                                                                                    @if (Auth::id() === $comment->user_id || Auth::id() === $post->user_id)
+                                                                                        <div id="comment-{{ $comment->comment_id }}"
+                                                                                            class="comment-item">
+                                                                                            <div class="dropdown">
+                                                                                                <button
+                                                                                                    class="btn btn-link p-0"
+                                                                                                    type="button"
+                                                                                                    id="dropdownMenuButton{{ $comment->comment_id }}"
+                                                                                                    data-bs-toggle="dropdown"
+                                                                                                    aria-expanded="false">
+                                                                                                    <i
+                                                                                                        class="fa-solid fa-ellipsis"></i>
+                                                                                                </button>
+                                                                                                <ul class="dropdown-menu dropdown-menu-end"
+                                                                                                    aria-labelledby="dropdownMenuButton{{ $comment->comment_id }}">
+                                                                                                    @if (Auth::id() === $comment->user_id)
+                                                                                                        <li>
+                                                                                                            <button
+                                                                                                                class="dropdown-item edit-btn-comment"
+                                                                                                                data-comment-id="{{ $comment->comment_id }}"><i
+                                                                                                                    class="fas fa-edit"></i>
+                                                                                                                Edit</button>
+                                                                                                        </li>
+                                                                                                    @endif
+                                                                                                    <li>
+                                                                                                        <form
+                                                                                                            method="POST"
+                                                                                                            action="{{ route('comments.destroy', $comment->comment_id) }}"
+                                                                                                            id="delete-form-{{ $comment->comment_id }}"
+                                                                                                            class="d-inline">
+                                                                                                            @csrf
+                                                                                                            @method('DELETE')
+                                                                                                            <button
+                                                                                                                type="button"
+                                                                                                                class="dropdown-item delete-btn-comment"
+                                                                                                                data-comment-id="{{ $comment->comment_id }}">
+                                                                                                                <i
+                                                                                                                    class="fas fa-trash"></i>
+                                                                                                                Delete
+                                                                                                            </button>
+                                                                                                        </form>
+                                                                                                    </li>
+                                                                                                </ul>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    @endif
+                                                                                @endauth
+                                                                            </div>
+                                                                            <p class="mb-1 comment-content"
+                                                                                id="comment-content-{{ $comment->comment_id }}">
+                                                                                {{ $comment->content }}</p>
+
+                                                                                            <!-- Hidden edit form -->
+                                                                            <div class="edit-form d-none" id="edit-form-{{ $comment->comment_id }}">
+                                                                                <form method="POST" action="{{ url('comments.update', $comment->comment_id) }}" class="d-flex mt-3 edit-comment-form" enctype="multipart/form-data">
+                                                                                    @csrf
+                                                                                    @method('PUT')
+                                                                                    <input type="text" class="form-control me-2" name="content" value="{{ $comment->content }}" required>
+                                                                                    <input type="hidden" name="comment_id" value="{{ $comment->comment_id }}">
+                                                                                    <button class="btn btn-primary" type="submit">Save</button>
+                                                                                    <button type="button" class="btn btn-secondary cancel-edit" data-comment-id="{{ $comment->comment_id }}" style="margin-left: 4px;">Cancel</button>
+                                                                                </form>
+                                                                            </div>
+
+                                                                            <div class="comment" id="comment-{{ $comment->comment_id }}">
+                                                                                <button class="btn btn-link btn-sm reply-btn" data-comment-id="{{ $comment->comment_id }}">Reply</button>
+                                                                                
+                                                                                <!-- Hidden reply form -->
+                                                                                <div class="reply-form d-none">
+                                                                                    <form class="reply-form d-flex justify-content-end" method="POST">
+                                                                                        @csrf
+                                                                                        <input type="hidden" name="post_id" value="{{ $post->user_post_id }}">
+                                                                                        <input type="hidden" name="parent_id" value="{{ $comment->comment_id }}">
+                                                                                        <input type="text" class="form-control me-2" name="content" placeholder="Add a reply..." required>
+                                                                                        <button class="btn btn-primary me-2" type="submit">Reply</button>
+                                                                                        <button type="button" class="btn btn-secondary cancel-reply">Cancel</button>
+                                                                                    </form>
+                                                                                </div>
+                                                                                
+                                                                                
+                                                                                <div class="replies-container mt-2">
+                                                                                    @if ($comment->replies->count() > 0)
                                                                                     <button class="btn btn-link btn-sm view-replies-btn" data-comment-id="{{ $comment->comment_id }}">
-                                                                                        View {{ $comment->replies->count() }} {{ Str::plural('reply', $comment->replies->count()) }}
+                                                                                        View <span class="reply-count">{{ $comment->replies->count() }}</span> {{ Str::plural('reply', $comment->replies->count()) }}
                                                                                         <i class="fas fa-chevron-down"></i>
                                                                                     </button>
-                                                                                @endif
+                                                                                    
+                                                                                        <!-- Replies container -->
+                                                                                        <div class="replies-list d-none">
+                                                                                            @foreach ($comment->replies as $reply)
+                                                                                                <div class="comment d-flex mb-2 p-2 border-bottom" id="reply-{{ $reply->comment_id }}">
+                                                                                                    <img src="{{ $reply->user->profile_picture ? '/storage/' . $reply->user->profile_picture : '/assets-user/img/none-profile.jpg' }}" alt="User" class="rounded-circle small-img">
+                                                                                                    <div class="ms-2 flex-grow-1">
+                                                                                                        <div class="d-flex justify-content-between">
+                                                                                                            <div>
+                                                                                                                <strong>{{ $reply->user->username }}</strong>
+                                                                                                                <div class="text-muted"  style="font-size:13px;">
+                                                                                                                    @php
+                                                                                                                        $createdAt = $reply->created_at;
+                                                                                                                        $now = \Carbon\Carbon::now();
+                                                                                                                        $oneDayAgo = $now->subDay();
+                                                                                                                    @endphp
+                                                                                        
+                                                                                                                    @if ($createdAt->lessThanOrEqualTo($oneDayAgo))
+                                                                                                                        {{ $createdAt->format('F j, Y') }}
+                                                                                                                    @else
+                                                                                                                        {{ $createdAt->format('F j, Y') }}, {{ $createdAt->diffForHumans() }}
+                                                                                                                    @endif
+                                                                                                                </div>
+                                                                                                            </div>
+                                                                                                            <div>
+                                                                                                                <button class="btn btn-link btn-sm more-options-btn" data-bs-toggle="dropdown" aria-expanded="false">
+                                                                                                                    <i class="fa-solid fa-ellipsis"></i>
+                                                                                                                </button>
+                                                                                                                <ul class="dropdown-menu dropdown-menu-end">
+                                                                                                                    <li><a class="dropdown-item edit-reply-btn" href="#" data-reply-id="{{ $reply->comment_id }}" data-comment-id="{{ $comment->comment_id }}"><i class="fas fa-edit"></i> Edit</a></li>
+                                                                                                                    <li><a class="dropdown-item delete-reply-btn" href="#" data-reply-id="{{ $reply->comment_id }}" data-comment-id="{{ $comment->comment_id }}"><i class="fas fa-trash"></i> Delete</a></li>
+                                                                                                                </ul>
+                                                                                                            </div>
+                                                                                                        </div>
+                                                                                                        <p class="mb-1 reply-content">{{ $reply->content }}</p>
+                                                                                                        <div class="edit-reply-form d-none">
+                                                                                                            <form method="POST" action="{{ route('comments.updateReply', ['comment' => $comment->comment_id, 'reply' => $reply->comment_id]) }}" class="d-flex align-items-center">
+                                                                                                                @csrf
+                                                                                                                @method('PUT')
+                                                                                                                <input type="text" class="form-control me-2" name="content" value="{{ $reply->content }}" required>
+                                                                                                                <button class="btn btn-primary btn-sm me-2" type="submit">Save</button>
+                                                                                                                <button type="button" class="btn btn-secondary btn-sm cancel-edit-btn">Cancel</button>
+                                                                                                            </form>
+                                                                                                        </div>
+                                                                                                    </div>
+                                                                                                </div>
+                                                                                            @endforeach
+                                                                                        </div>
+                                                                                    @endif
+                                                                                </div>
+                                                                                
                                                                             </div>
                                                                         </div>
                                                                     </div>
-                                                                @endforeach
-                                                            </div>
-                                                        
+                                                                    @endforeach
+                                                                </div>
+
                                                             <!-- Add Comment Form -->
                                                             <div class="mt-3">
-                                                                <form method="POST" action="{{ route('comments.store') }}"
+                                                                <form method="POST"
+                                                                    action="{{ route('comments.store') }}"
                                                                     class="d-flex mt-3 comment-form"
                                                                     data-comment-url="{{ route('comments.store') }}">
                                                                     @csrf
-                                                                    <input type="hidden" name="post_id" value="{{ $post->user_post_id }}">
-                                                                    <input type="text" class="form-control me-2" name="content"
+                                                                    <input type="hidden" name="post_id"
+                                                                        value="{{ $post->user_post_id }}">
+                                                                    <input type="text"
+                                                                        class="form-control me-2" name="content"
                                                                         placeholder="Add a comment..." required>
-                                                                    <button class="btn btn-primary" type="submit">Comment</button>
+                                                                    <button class="btn btn-primary"
+                                                                        type="submit">Comment</button>
                                                                 </form>
+                                                            </div>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
-                                                </div>
-                                            </div>
                                             @endif
-                                @endforeach
-                                @endif
-                            </div>
-                        </div>
-
-                        <!-- end profile -->
-                        <!-- begin profile-content -->
-                        <div class="profile-content">
-                            <!-- begin tab-content -->
-                            <div class="tab-content p-0">
-                                <!-- begin #profile-post tab -->
-                                <div class="tab-pane fade active show" id="profile-post">
-                                    <!-- begin timeline -->
-
+                                        @endforeach
+                                    @endif
                                 </div>
-                                <!-- end #profile-post tab -->
                             </div>
-                            <!-- end tab-content -->
+
+                            <!-- end profile -->
+                            <!-- begin profile-content -->
+                            <div class="profile-content">
+                                <!-- begin tab-content -->
+                                <div class="tab-content p-0">
+                                    <!-- begin #profile-post tab -->
+                                    <div class="tab-pane fade active show" id="profile-post">
+                                        <!-- begin timeline -->
+                                    </div>
+                                    <!-- end #profile-post tab -->
+                                </div>
+                                <!-- end tab-content -->
+                            </div>
+                            <!-- end profile-content -->
                         </div>
-                        <!-- end profile-content -->
                     </div>
                 </div>
-            </div>
             </div>
 
 
@@ -352,37 +513,46 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="../../assets-user/js/user-post.js"></script>
     <script src="../../assets-user/js/unfollow.js"></script>
+    <script src="../../assets-user/js/delete-comment.js"></script>
+    <script src="../../assets-user/js/reply.js"></script>
+    <script>
+        var userId = @json(Auth::id());
+        var postOwnerId = @json($post->user_id);
+    </script>
+    <script>
+        window.csrfToken = '{{ csrf_token() }}';
+        window.httpMethod = 'PUT';
+    </script>
 
-<script>
-    $(document).ready(function() {
-    $('.follow-btn').click(function() {
-        var userId = $(this).data('user-id');
-        var isFollowing = $(this).text().trim() === 'Following';
-        var url = isFollowing ? '{{ route("unfollow", ":id") }}' : '{{ route("follow", ":id") }}';
-        url = url.replace(':id', userId);
+    <script>
+        $(document).ready(function() {
+            $('.follow-btn').click(function() {
+                var userId = $(this).data('user-id');
+                var isFollowing = $(this).text().trim() === 'Following';
+                var url = isFollowing ? '{{ route('unfollow', ':id') }}' : '{{ route('follow', ':id') }}';
+                url = url.replace(':id', userId);
 
-        var button = $(this);
-        
-        $.ajax({
-            url: url,
-            type: 'POST',
-            data: {
-                _token: '{{ csrf_token() }}'
-            },
-            success: function(response) {
-                if (isFollowing) {
-                    button.text('Follow');
-                } else {
-                    button.text('Following');
-                }
-            },
-            error: function(xhr) {
-                console.log(xhr.responseText);
-            }
+                var button = $(this);
+
+                $.ajax({
+                    url: url,
+                    type: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}'
+                    },
+                    success: function(response) {
+                        if (isFollowing) {
+                            button.text('Follow');
+                        } else {
+                            button.text('Following');
+                        }
+                    },
+                    error: function(xhr) {
+                        console.log(xhr.responseText);
+                    }
+                });
+            });
         });
-    });
-});
-</script>
+    </script>
 </body>
-
 </html>

@@ -83,6 +83,21 @@ body {
     height: 40px;
 }
 
+.input-container {
+    position: relative;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #444444;
+    margin-left: 100px;
+}
+
+
 .view-icon {
     position: absolute;
     top: calc(50% - 12px);

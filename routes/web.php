@@ -40,11 +40,24 @@ Route::middleware(['auth'])->group(function () {
 
     //Comments
     Route::post('/comments', [CommentController::class, 'store'])->name('comments.store'); //store comments
-    Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy'); //detele comments
+    Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy');
     Route::post('/like/toggle', [CommentController::class, 'toggleLike'])->name('like.toggle'); //like post
+    Route::get('/comments/{comment}/edit', [CommentController::class, 'edit'])->name('comments.edit');
+    Route::put('/comments/{comment}', [CommentController::class, 'update'])->name('comments.update');
+
+    //Reply
     Route::post('/comments/{comment}/reply', [CommentController::class, 'storeReply'])->name('comments.reply');
     Route::get('/comments/{comment}/replies', [CommentController::class, 'getReplies'])->name('comments.getReplies');
     Route::get('/comments/{comment}/reply-count', [CommentController::class, 'getReplyCount'])->name('comments.getReplyCount');
+    Route::put('/replies/{id}', [CommentController::class, 'updateReply'])->name('reply.update');
+    Route::delete('/replies/{id}', [CommentController::class, 'destroyReply'])->name('reply.destroy');
+
+    Route::put('/comments/{comment}/replies/{reply}', [CommentController::class, 'updateReply'])->name('comments.updateReply');
+    Route::delete('/comments/{comment}/replies/{reply}', [CommentController::class, 'destroyReply']);
+
+
+
+    
 
     //Notifications
     Route::get('/notifications', [CommentController::class, 'showNotifications'])->name('notifications');

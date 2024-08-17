@@ -97,10 +97,13 @@ class FriendController extends Controller
     {
         $user = auth()->user();
     
-        // remove the follow relationship
-        $user->following()->detach($userId);
+        if ($user->following()->where('following_id', $userId)->exists()) {
+            $user->following()->detach($userId);
+            return response()->json(['success' => true, 'message' => 'User unfollowed successfully.']);
+        }
     
-        return response()->json(['success' => true]);
+        return response()->json(['success' => false, 'message' => 'User was not followed.']);
     }
+    
      
 }

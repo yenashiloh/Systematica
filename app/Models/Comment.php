@@ -9,7 +9,7 @@ class Comment extends Model
     protected $table = 'comments';
 
     protected $primaryKey = 'comment_id';
-
+    
     public $incrementing = true;
 
     protected $fillable = [
@@ -44,4 +44,5 @@ class Comment extends Model
         return $this->created_at->diffForHumans();
     }
 
+    
 }

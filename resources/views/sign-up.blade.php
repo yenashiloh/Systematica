@@ -55,11 +55,15 @@
                         <i id="pass-toggle-btn" class="fa-solid fa-eye"></i>
                     </div>
                 </div>
-                
                 <div class="form-group">
-                    <label for="confirm-password">Confirm Password <span class="required-asterisk">*</span></label>
-                    <input type="password" id="confirm-password" name="password_confirmation" placeholder="Confirm your password">
+                    <label for="password">Confirm Password <span class="required-asterisk">*</span></label>
+                    <div class="password-container">
+                        <input type="password" id="confirm-password" name="password_confirmation"  placeholder="Confirm your password"
+                               style="margin-right: 20px;">
+                        <i id="confirm-pass-toggle-btn" class="fa-solid fa-eye"></i>
+                    </div>
                 </div>
+               
             </div>
             <div class="submit-btn">
                 <input type="submit" value="Submit">

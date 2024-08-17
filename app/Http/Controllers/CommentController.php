@@ -15,9 +15,12 @@ use App\Models\UserFollow;
 use App\Models\Like;
 use Illuminate\Support\Facades\DB;
 use App\Models\Notification;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+
 
 class CommentController extends Controller
 {
+    use AuthorizesRequests;
     public function store(Request $request)
     {
         $request->validate([
@@ -56,14 +59,17 @@ class CommentController extends Controller
 
     public function destroy(Comment $comment)
     {
-        if (Auth::id() !== $comment->user_id) {
-            return redirect()->back()->with('error', 'Unauthorized action.');
+        $post = $comment->post;
+    
+        if (Auth::id() !== $comment->user_id && Auth::id() !== $post->user_id) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized action.'], 403);
         }
-
+    
+        $postId = $comment->post_id;
         $comment->delete();
-        return redirect()->back()->with('success', 'Comment deleted successfully!');
+        return response()->json(['success' => true, 'postId' => $postId]);
     }
-
+    
     public function toggleLike(Request $request)
     {
         // validate the request
@@ -125,29 +131,30 @@ class CommentController extends Controller
         ]);
     }
     
-    public function storeReply(Request $request)
+    public function storeReply(Request $request, Comment $comment)
     {
         $validatedData = $request->validate([
             'post_id' => 'required|exists:user_post,user_post_id',
-            'parent_id' => 'required|exists:comments,comment_id',
             'content' => 'required|string',
         ]);
-    
-        $comment = auth()->user()->comments()->create([
-            'post_id' => $validatedData['post_id'],
-            'parent_id' => $validatedData['parent_id'],
-            'content' => $validatedData['content'],
-        ]);
-    
 
-        $comment->load('user');
-        $comment->append('created_at_human');
-    
+        $reply = $comment->replies()->create([
+            'user_id' => auth()->id(),
+            'post_id' => $validatedData['post_id'],
+            'content' => $validatedData['content'],
+            'parent_id' => $comment->comment_id,
+        ]);
+
+        $reply->load('user');
+        $reply->append('created_at_human');
+
         return response()->json([
             'success' => true,
-            'comment' => $comment,
+            'comment' => $reply,
         ]);
     }
+    
+
     public function getReplies(Comment $comment)
     {
         $replies = $comment->replies()->with('user')->get();
@@ -165,4 +172,64 @@ class CommentController extends Controller
             'count' => $replyCount
         ]);
     }
-}
+
+    public function updateReply(Request $request, Comment $comment, Comment $reply)
+    {
+        if (Auth::id() !== $reply->user_id) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized action.'], 403);
+        }
+    
+        $validatedData = $request->validate([
+            'content' => 'required|string|max:1000',
+        ]);
+    
+        $reply->update($validatedData);
+    
+        return response()->json([
+            'success' => true,
+            'content' => $reply->content,
+        ]);
+    }
+
+    public function destroyReply(Comment $comment, Comment $reply)
+    {
+        if (Auth::id() !== $reply->user_id && Auth::id() !== $comment->user_id) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized action.'], 403);
+        }
+
+    
+        $reply->delete();
+    
+        return response()->json([
+            'success' => true,
+            'replyCount' => $comment->replies()->count(), 
+        ]);
+    }
+
+    public function edit(Comment $comment)
+    {
+        if (Auth::id() !== $comment->user_id) {
+            return redirect()->back()->with('error', 'Unauthorized action.');
+        }
+
+        return view('comments.edit', compact('comment'));
+    }
+
+    public function update(Request $request, Comment $comment)
+    {
+        if (Auth::id() !== $comment->user_id) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized action.'], 403);
+        }
+    
+        $validatedData = $request->validate([
+            'content' => 'required|string|max:1000',
+        ]);
+    
+        $comment->update($validatedData);
+    
+        return response()->json([
+            'success' => true,
+            'comment' => $comment
+        ]);
+    }
+    }        

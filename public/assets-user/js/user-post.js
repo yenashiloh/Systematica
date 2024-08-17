@@ -185,7 +185,6 @@ document.addEventListener('DOMContentLoaded', function() {
 /**
  * privacy
  */
-    // Handle privacy dropdown
     var privacyIcon = document.getElementById('privacyIcon');
     var privacyDropdown = document.getElementById('privacyDropdown');
 
@@ -197,7 +196,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Optional: Hide dropdown when clicking outside
+
     document.addEventListener('click', function(e) {
         if (!privacyIcon.contains(e.target) && !privacyDropdown.contains(e.target)) {
             privacyDropdown.style.display = 'none';
@@ -246,51 +245,80 @@ jQuery(document).ready(function($) {
  * comments
  */
 $(document).ready(function() {
+    var userId = $('#main').data('user-id');
+
+    function getCSRFToken() {
+        return $('meta[name="csrf-token"]').attr('content');
+    }
+
     $('.comment-form').on('submit', function(e) {
         e.preventDefault();
         var form = $(this);
         var postId = form.find('input[name="post_id"]').val();
         var content = form.find('input[name="content"]').val();
         var url = form.data('comment-url');
+        
         $.ajax({
             url: url,
             method: 'POST',
             data: {
-                _token: $('meta[name="csrf-token"]').attr('content'),
+                _token: getCSRFToken(), 
                 post_id: postId,
                 content: content
             },
             success: function(response) {
                 if (response.success && response.comment) {
                     var comment = response.comment;
+                    var isUserAuthorized = userId === comment.user_id || userId === comment.post.user_id;
                     var commentHtml = `
-                    <div class="comment d-flex mb-2 p-2 border-bottom" data-comment-id="${comment.comment_id}">
-                        <img src="${comment.user.profile_picture ? '/storage/' + comment.user.profile_picture : '/assets-user/img/none-profile.jpg'}" alt="User" class="rounded-circle small-img">
-                        <div class="ms-2">
-                            <strong>${comment.user.username}</strong>
-                            <p class="mb-1">${comment.content}</p>
-                            <div class="text-muted" style="font-size: 13px;">${comment.created_at_human}</div>
-                            <button class="btn btn-link btn-sm reply-btn" data-comment-id="${comment.comment_id}">Reply</button>
-                            <div class="replies mt-2"></div>
-                            <div class="reply-form d-none">
-                                <form method="POST" action="{{ route('comments.reply', ['comment' => '__COMMENT_ID__']) }}"
-                                    class="d-flex mt-3 reply-form"
-                                    data-reply-url="{{ route('comments.reply', ['comment' => '__COMMENT_ID__']) }}">
-                                    @csrf
-                                    <input type="hidden" name="post_id" value="${postId}">
-                                    <input type="hidden" name="parent_id" value="${comment.comment_id}">
-                                    <input type="text" class="form-control me-2" name="content" placeholder="Add a reply..." required>
-                                    <button class="btn btn-primary" type="submit">Reply</button>
-                                </form>
+                        <div class="comment d-flex mb-2 p-2 border-bottom" data-comment-id="${comment.comment_id}" data-post-id="${postId}">
+                            <img src="${comment.user.profile_picture ? '/storage/' + comment.user.profile_picture : '/assets-user/img/none-profile.jpg'}" alt="User" class="rounded-circle small-img">
+                            <div class="ms-2 w-100">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <strong>${comment.user.username}</strong>
+                                        <p class="mb-1" id="comment-content-${comment.comment_id}">${comment.content}</p>
+                                        <div class="text-muted" style="font-size: 13px;">${comment.created_at_human}</div>
+                                    </div>
+                                    ${isUserAuthorized ? `
+                                    <div class="comment-item">
+                                        <div class="dropdown">
+                                            <button class="btn btn-link p-0" type="button" id="dropdownMenuButton${comment.comment_id}" data-bs-toggle="dropdown" aria-expanded="false">
+                                                <i class="fa-solid fa-ellipsis"></i>
+                                            </button>
+                                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton${comment.comment_id}">
+                                                <li>
+                                                    <button class="dropdown-item edit-btn" data-comment-id="${comment.comment_id}"><i class="fas fa-edit"></i> Edit</button>
+                                                </li>
+                                                <li>
+                                                    <button class="dropdown-item delete-btn" data-comment-id="${comment.comment_id}">
+                                                        <i class="fas fa-trash"></i> Delete
+                                                    </button>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>` : ''}
+                                </div>
+                                <div class="edit-form d-none mt-3" id="edit-form-${comment.comment_id}">
+                                    <div class="d-flex">
+                                        <form method="POST" action="/comments/${comment.comment_id}" class="d-flex flex-grow-1 me-2 edit-comment-form">
+                                            <input type="hidden" name="comment_id" value="${comment.comment_id}">
+                                            <input type="text" name="content" class="form-control me-2" value="${comment.content}" required>
+                                            <button class="btn btn-primary" type="submit">Save</button>
+                                        </form>
+                                        <button class="btn btn-secondary cancel-edit" type="button" data-comment-id="${comment.comment_id}">Cancel</button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                `;
+                    `;
                     $(`#comments-${postId} .comments-container`).append(commentHtml);
                     form.find('input[name="content"]').val('');
                     var commentCountEl = form.closest('.collapse').prev().find('button:last-child span');
                     var currentCount = parseInt(commentCountEl.text());
                     commentCountEl.text(currentCount + 1);
+                    
+                    $('[data-bs-toggle="dropdown"]').dropdown();
                 } else {
                     console.error('Unexpected response structure:', response);
                 }
@@ -303,50 +331,98 @@ $(document).ready(function() {
         });
     });
 
-    $(document).on('click', '.reply-btn', function() {
-        var replyForm = $(this).closest('.comment').find('.reply-form');
-        replyForm.toggleClass('d-none');
+    $(document).on('click', '.delete-btn', function() {
+        var commentId = $(this).data('comment-id');
+        var postId = $(this).closest('.comment').data('post-id'); 
+
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, delete it!',
+            cancelButtonText: 'No, cancel!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: `/comments/${commentId}`,
+                    method: 'DELETE',
+                    data: {
+                        _token: getCSRFToken()
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            $(`[data-comment-id="${commentId}"]`).remove();
+                            var commentCountEl = $(`#comment-count-${postId}`);
+                            if (commentCountEl.length) {
+                                var currentCount = parseInt(commentCountEl.text(), 10);
+                                commentCountEl.text(currentCount - 1);
+                            }
+                            Swal.fire('Deleted!', 'Your comment has been deleted.', 'success');
+                        } else {
+                            Swal.fire('Error!', 'Failed to delete comment.', 'error');
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error:', error);
+                        console.log('Status:', status);
+                        console.log('Response:', xhr.responseText);
+                        Swal.fire('Error!', 'There was an issue deleting the comment.', 'error');
+                    }
+                });
+            }
+        });
     });
 
-    $(document).on('submit', '.reply-form', function(e) {
-        e.preventDefault();
-        var form = $(this);
-        var url = form.attr('action');
-        var postId = form.find('input[name="post_id"]').val();
-        var parentId = form.find('input[name="parent_id"]').val();
-        var content = form.find('input[name="content"]').val();
 
+    /**
+     * edit
+     */
+    $(document).on('click', '.edit-btn', function () {
+        const commentId = $(this).data('comment-id');
+        $(`#edit-form-${commentId}`).removeClass('d-none');
+        $(`#comment-content-${commentId}`).addClass('d-none');
+    });
+
+    $(document).on('click', '.cancel-edit', function () {
+        const commentId = $(this).data('comment-id');
+        $(`#edit-form-${commentId}`).addClass('d-none');
+        $(`#comment-content-${commentId}`).removeClass('d-none');
+    });
+
+    $(document).on('submit', '.edit-comment-form', function (event) {
+        event.preventDefault();
+    
+        const form = $(this);
+        const commentId = form.find('input[name="comment_id"]').val();
+        const content = form.find('input[name="content"]').val();
+        const url = form.attr('action');
+    
         $.ajax({
             url: url,
-            method: 'POST',
-            data: {
-                _token: $('meta[name="csrf-token"]').attr('content'),
-                post_id: postId,
-                parent_id: parentId,
+            method: 'PUT',
+            data: JSON.stringify({
                 content: content
+            }),
+            contentType: 'application/json',
+            headers: {
+                'X-CSRF-TOKEN': getCSRFToken(),
+                'Accept': 'application/json'
             },
-            success: function(response) {
-                if (response.success && response.comment) {
-                    var comment = response.comment;
-                    var replyHtml = `
-                        <div class="comment d-flex mb-2 p-2 border-bottom">
-                            <img src="${comment.user.profile_picture ? '/storage/' + comment.user.profile_picture : '/assets-user/img/none-profile.jpg'}" alt="User" class="rounded-circle small-img">
-                            <div class="ms-2">
-                                <strong>${comment.user.username}</strong>
-                                <p class="mb-1">${comment.content}</p>
-                            </div>
-                        </div>
-                    `;
-                    $(form).closest('.comment').find('.replies').append(replyHtml);
-                    form.find('input[name="content"]').val('');
+            success: function(data) {
+                if (data.success) {
+                    $(`#comment-content-${commentId}`).text(data.comment.content);
+                    $(`#edit-form-${commentId}`).addClass('d-none');
+                    $(`#comment-content-${commentId}`).removeClass('d-none');
                 } else {
-                    console.error('Unexpected response structure:', response);
+                    Swal.fire('Error!', 'An error occurred while updating the comment.', 'error');
                 }
             },
             error: function(xhr, status, error) {
-                console.error('Error:', error);
-                console.log('Status:', status);
-                console.log('Response:', xhr.responseText);
+                console.error('Error:', xhr.responseText);
+                Swal.fire('Error!', 'An error occurred while updating the comment.', 'error');
             }
         });
     });
@@ -386,7 +462,3 @@ $(document).ready(function() {
         });
     });
 });
-
-/**
- * search
- */

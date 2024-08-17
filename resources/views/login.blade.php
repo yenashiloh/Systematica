@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Secular+One:wght@400&display=swap" />
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="icon" href="{{ asset('assets/images/logo.png') }}" type="image/x-icon">
 </head>
 
@@ -50,6 +51,9 @@
                                     <img src="../assets/images/password.png" alt="Icon">
                                     <span>Password</span>
                                 </label>
+                                <span class="toggle-password">
+                                    <i class="fas fa-eye" id="togglePassword"></i>
+                                </span>
                             </div>
                         </div>
                         {{-- <div class="forgot-password">
@@ -68,23 +72,7 @@
                                         <div class="placeholder or-text">Or</div>
                                         <div class="frame-child6"></div>
                                     </div>
-                                    {{-- <div class="button-wrapper">
-                                        <button class="likha-button">
-                                            <div class="content14">
-                                                <img class="likha-logo" alt=""
-                                                    src="../assets/images/likha.png" />
-                                                Likha
-                                            </div>
-                                        </button>
-
-                                        <button class="hypefive-button">
-                                            <div class="content14">
-                                                <img class="hypefive-logo" alt=""
-                                                    src="../assets/images/hypehive.png" />
-                                                HypeHive
-                                            </div>
-                                        </button>
-                                    </div> --}}
+                                 
                                 </div>
                                 <div class="have-no-account-yet-parent">
                                     <div class="placeholder">Have no account yet?</div>
@@ -110,6 +98,16 @@
         <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+        <script>
+            document.getElementById('togglePassword').addEventListener('click', function (e) {
+                const passwordInput = document.getElementById('password');
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+
+                this.classList.toggle('fa-eye');
+                this.classList.toggle('fa-eye-slash');
+            });
+        </script>
     </body>
 </body>
 

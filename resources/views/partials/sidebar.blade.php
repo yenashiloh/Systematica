@@ -30,7 +30,7 @@
           </a>
           <ul id="tables-nav" class="nav-content collapse {{ Route::is('user.settings') ? 'show' : '' }}" data-bs-parent="#sidebar-nav">
               <li>
-                  <a href="tables-general.html">
+                             <a href="{{ route('user.edit-profile') }}">
                       <i class="bi bi-circle"></i><span>Edit Profile</span>
                   </a>
               </li>

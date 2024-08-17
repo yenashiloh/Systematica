@@ -126,7 +126,7 @@ document.addEventListener("DOMContentLoaded", function () {
   
     for (let i = 1; i <= numImages; i++) {
         const image = document.createElement("img");
-        image.src = ''; // Add your image source
+        image.src = ''; 
         image.className = "random-image";
         applyRandomStyles(image, container, minDistance);
         container.appendChild(image);
@@ -185,3 +185,11 @@ function isTooClose(element, container, minDistance) {
 
     return false;
 }
+
+const confirmPassToggleBtn = document.getElementById("confirm-pass-toggle-btn");
+
+confirmPassToggleBtn.addEventListener('click', () => {
+    const passwordInputType = confirmPassInput.type === 'password' ? 'text' : 'password';
+    confirmPassInput.type = passwordInputType;
+    confirmPassToggleBtn.className = passwordInputType === 'password' ? 'fa-solid fa-eye' : 'fa-solid fa-eye-slash';
+});
