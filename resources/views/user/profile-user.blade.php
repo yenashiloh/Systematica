@@ -63,7 +63,7 @@
                                         <!-- BEGIN profile-header-info -->
                                         <div class="profile-header-info">
                                             <h4 class="name-user" style="font-weight:bold;">
-                                                <span class="username-background" >
+                                                <span class="username-background">
                                                     {{ $userDetails->username }}
                                                 </span>
                                             </h4>
@@ -97,9 +97,7 @@
 
                                 </button>
                                 <div class="col-lg-12">
-                                    @if ($posts->isEmpty())
-                                        {{-- <div class="alert alert-info">No posts to display.</div> --}}
-                                    @else
+                                    @if ($posts->isNotEmpty())
                                         @foreach ($posts as $post)
                                             @if (
                                                 $post->privacy === 'Public' ||
@@ -118,14 +116,10 @@
 
                                                                 <!-- Post Information -->
                                                                 <div class="ms-3 flex-grow-1">
-                                                                    <div
-                                                                        class="d-flex justify-content-between align-items-start">
+                                                                    <div class="d-flex justify-content-between align-items-start">
                                                                         <div>
-                                                                            <div
-                                                                                class="d-flex justify-content-between align-items-center">
-                                                                                <strong
-                                                                                    class="d-block mt-2">{{ $post->user->username }}
-                                                                                </strong>
+                                                                            <div class="d-flex justify-content-between align-items-center">
+                                                                                <strong class="d-block mt-2">{{ $post->user->username }}</strong>
                                                                             </div>
                                                                             <div class="text-muted" style="font-size:13px;">
                                                                                 {{ $post->created_at->diffForHumans() }}
@@ -182,208 +176,308 @@
                                                                     </button>
                                                                 </div>
 
-
-                                                                
-                                                            <!-- Comments Section -->
-                                                            <div class="collapse mt-3"
-                                                            id="comments-{{ $post->user_post_id }}">
-                                                            <div class="comments-container">
-                                                                <h6>Comments</h6>
-                                                                <hr>
-                                                                <!-- Loop through comments -->
-                                                                @foreach ($post->comments->whereNull('parent_id') as $comment)
-                                                                    <div class="comment d-flex mb-2 p-2 border-bottom"
-                                                                        data-comment-id="{{ $comment->comment_id }}">
-                                                                        <img src="{{ $comment->user->profile_picture ? asset('storage/' . $comment->user->profile_picture) : asset('assets-user/img/none-profile.jpg') }}"
-                                                                            alt="Profile Picture"
-                                                                            class="rounded-circle small-img">
-                                                                        <div class="ms-2 w-100">
-                                                                            <div
-                                                                                class="d-flex justify-content-between">
-                                                                                <div>
-                                                                                    <strong>{{ $comment->user->username }}</strong>
-                                                                                    @php
-                                                                                        $createdAt =
-                                                                                            $comment->created_at;
-                                                                                        $now = \Carbon\Carbon::now();
-                                                                                        $oneDayAgo = $now->subDay();
-                                                                                    @endphp
-                                                                                    <div class="text-muted"
-                                                                                        style="font-size: 13px;">
-                                                                                        @if ($createdAt->lessThanOrEqualTo($oneDayAgo))
-                                                                                            {{ $createdAt->format('F j, Y') }}
-                                                                                        @else
-                                                                                            {{ $createdAt->format('F j, Y') }},
-                                                                                            {{ $createdAt->diffForHumans() }}
-                                                                                        @endif
-                                                                                    </div>
-                                                                                </div>
-                                                                                @auth
-                                                                                    @if (Auth::id() === $comment->user_id || Auth::id() === $post->user_id)
-                                                                                        <div id="comment-{{ $comment->comment_id }}"
-                                                                                            class="comment-item">
-                                                                                            <div class="dropdown">
-                                                                                                <button
-                                                                                                    class="btn btn-link p-0"
-                                                                                                    type="button"
-                                                                                                    id="dropdownMenuButton{{ $comment->comment_id }}"
-                                                                                                    data-bs-toggle="dropdown"
-                                                                                                    aria-expanded="false">
-                                                                                                    <i
-                                                                                                        class="fa-solid fa-ellipsis"></i>
-                                                                                                </button>
-                                                                                                <ul class="dropdown-menu dropdown-menu-end"
-                                                                                                    aria-labelledby="dropdownMenuButton{{ $comment->comment_id }}">
-                                                                                                    @if (Auth::id() === $comment->user_id)
-                                                                                                        <li>
-                                                                                                            <button
-                                                                                                                class="dropdown-item edit-btn-comment"
-                                                                                                                data-comment-id="{{ $comment->comment_id }}"><i
-                                                                                                                    class="fas fa-edit"></i>
-                                                                                                                Edit</button>
-                                                                                                        </li>
-                                                                                                    @endif
-                                                                                                    <li>
-                                                                                                        <form
-                                                                                                            method="POST"
-                                                                                                            action="{{ route('comments.destroy', $comment->comment_id) }}"
-                                                                                                            id="delete-form-{{ $comment->comment_id }}"
-                                                                                                            class="d-inline">
-                                                                                                            @csrf
-                                                                                                            @method('DELETE')
-                                                                                                            <button
-                                                                                                                type="button"
-                                                                                                                class="dropdown-item delete-btn-comment"
-                                                                                                                data-comment-id="{{ $comment->comment_id }}">
-                                                                                                                <i
-                                                                                                                    class="fas fa-trash"></i>
-                                                                                                                Delete
-                                                                                                            </button>
-                                                                                                        </form>
-                                                                                                    </li>
-                                                                                                </ul>
+                                                                <!-- Comments Section -->
+                                                                <div class="collapse mt-3"
+                                                                    id="comments-{{ $post->user_post_id }}">
+                                                                    <div class="comments-container">
+                                                                        <h6>Comments</h6>
+                                                                        <hr>
+                                                                        <!-- Loop through comments -->
+                                                                        @foreach ($post->comments->whereNull('parent_id') as $comment)
+                                                                            <div class="comment d-flex mb-2 p-2 border-bottom"
+                                                                                data-comment-id="{{ $comment->comment_id }}">
+                                                                                <img src="{{ $comment->user->profile_picture ? asset('storage/' . $comment->user->profile_picture) : asset('assets-user/img/none-profile.jpg') }}"
+                                                                                    alt="Profile Picture"
+                                                                                    class="rounded-circle small-img">
+                                                                                <div class="ms-2 w-100">
+                                                                                    <div
+                                                                                        class="d-flex justify-content-between">
+                                                                                        <div>
+                                                                                            <strong>{{ $comment->user->username }}</strong>
+                                                                                            @php
+                                                                                                $createdAt =
+                                                                                                    $comment->created_at;
+                                                                                                $now = \Carbon\Carbon::now();
+                                                                                                $oneDayAgo = $now->subDay();
+                                                                                            @endphp
+                                                                                            <div class="text-muted"
+                                                                                                style="font-size: 13px;">
+                                                                                                @if ($createdAt->lessThanOrEqualTo($oneDayAgo))
+                                                                                                    {{ $createdAt->format('F j, Y') }}
+                                                                                                @else
+                                                                                                    {{ $createdAt->format('F j, Y') }},
+                                                                                                    {{ $createdAt->diffForHumans() }}
+                                                                                                @endif
                                                                                             </div>
                                                                                         </div>
-                                                                                    @endif
-                                                                                @endauth
-                                                                            </div>
-                                                                            <p class="mb-1 comment-content"
-                                                                                id="comment-content-{{ $comment->comment_id }}">
-                                                                                {{ $comment->content }}</p>
+                                                                                        @auth
+                                                                                            @if (Auth::id() === $comment->user_id || Auth::id() === $post->user_id)
+                                                                                                <div id="comment-{{ $comment->comment_id }}"
+                                                                                                    class="comment-item">
+                                                                                                    <div class="dropdown">
+                                                                                                        <button
+                                                                                                            class="btn btn-link p-0"
+                                                                                                            type="button"
+                                                                                                            id="dropdownMenuButton{{ $comment->comment_id }}"
+                                                                                                            data-bs-toggle="dropdown"
+                                                                                                            aria-expanded="false">
+                                                                                                            <i
+                                                                                                                class="fa-solid fa-ellipsis"></i>
+                                                                                                        </button>
+                                                                                                        <ul class="dropdown-menu dropdown-menu-end"
+                                                                                                            aria-labelledby="dropdownMenuButton{{ $comment->comment_id }}">
+                                                                                                            @if (Auth::id() === $comment->user_id)
+                                                                                                                <li>
+                                                                                                                    <button
+                                                                                                                        class="dropdown-item edit-btn-comment"
+                                                                                                                        data-comment-id="{{ $comment->comment_id }}"><i
+                                                                                                                            class="fas fa-edit"></i>
+                                                                                                                        Edit</button>
+                                                                                                                </li>
+                                                                                                            @endif
+                                                                                                            <li>
+                                                                                                                <form
+                                                                                                                    method="POST"
+                                                                                                                    action="{{ route('comments.destroy', $comment->comment_id) }}"
+                                                                                                                    id="delete-form-{{ $comment->comment_id }}"
+                                                                                                                    class="d-inline">
+                                                                                                                    @csrf
+                                                                                                                    @method('DELETE')
+                                                                                                                    <button
+                                                                                                                        type="button"
+                                                                                                                        class="dropdown-item delete-btn-comment"
+                                                                                                                        data-comment-id="{{ $comment->comment_id }}">
+                                                                                                                        <i
+                                                                                                                            class="fas fa-trash"></i>
+                                                                                                                        Delete
+                                                                                                                    </button>
+                                                                                                                </form>
+                                                                                                            </li>
+                                                                                                        </ul>
+                                                                                                    </div>
+                                                                                                </div>
+                                                                                            @endif
+                                                                                        @endauth
+                                                                                    </div>
+                                                                                    <p class="mb-1 comment-content"
+                                                                                        id="comment-content-{{ $comment->comment_id }}">
+                                                                                        {{ $comment->content }}</p>
 
-                                                                                            <!-- Hidden edit form -->
-                                                                            <div class="edit-form d-none" id="edit-form-{{ $comment->comment_id }}">
-                                                                                <form method="POST" action="{{ url('comments.update', $comment->comment_id) }}" class="d-flex mt-3 edit-comment-form" enctype="multipart/form-data">
-                                                                                    @csrf
-                                                                                    @method('PUT')
-                                                                                    <input type="text" class="form-control me-2" name="content" value="{{ $comment->content }}" required>
-                                                                                    <input type="hidden" name="comment_id" value="{{ $comment->comment_id }}">
-                                                                                    <button class="btn btn-primary" type="submit">Save</button>
-                                                                                    <button type="button" class="btn btn-secondary cancel-edit" data-comment-id="{{ $comment->comment_id }}" style="margin-left: 4px;">Cancel</button>
-                                                                                </form>
-                                                                            </div>
+                                                                                    <!-- Hidden edit form -->
+                                                                                    <div class="edit-form d-none"
+                                                                                        id="edit-form-{{ $comment->comment_id }}">
+                                                                                        <form method="POST"
+                                                                                            action="{{ url('comments.update', $comment->comment_id) }}"
+                                                                                            class="d-flex mt-3 edit-comment-form"
+                                                                                            enctype="multipart/form-data">
+                                                                                            @csrf
+                                                                                            @method('PUT')
+                                                                                            <input type="text"
+                                                                                                class="form-control me-2"
+                                                                                                name="content"
+                                                                                                value="{{ $comment->content }}"
+                                                                                                required>
+                                                                                            <input type="hidden"
+                                                                                                name="comment_id"
+                                                                                                value="{{ $comment->comment_id }}">
+                                                                                            <button
+                                                                                                class="btn btn-primary"
+                                                                                                type="submit">Save</button>
+                                                                                            <button type="button"
+                                                                                                class="btn btn-secondary cancel-edit"
+                                                                                                data-comment-id="{{ $comment->comment_id }}"
+                                                                                                style="margin-left: 4px;">Cancel</button>
+                                                                                        </form>
+                                                                                    </div>
 
-                                                                            <div class="comment" id="comment-{{ $comment->comment_id }}">
-                                                                                <button class="btn btn-link btn-sm reply-btn" data-comment-id="{{ $comment->comment_id }}">Reply</button>
-                                                                                
-                                                                                <!-- Hidden reply form -->
-                                                                                <div class="reply-form d-none">
-                                                                                    <form class="reply-form d-flex justify-content-end" method="POST">
-                                                                                        @csrf
-                                                                                        <input type="hidden" name="post_id" value="{{ $post->user_post_id }}">
-                                                                                        <input type="hidden" name="parent_id" value="{{ $comment->comment_id }}">
-                                                                                        <input type="text" class="form-control me-2" name="content" placeholder="Add a reply..." required>
-                                                                                        <button class="btn btn-primary me-2" type="submit">Reply</button>
-                                                                                        <button type="button" class="btn btn-secondary cancel-reply">Cancel</button>
-                                                                                    </form>
-                                                                                </div>
-                                                                                
-                                                                                
-                                                                                <div class="replies-container mt-2">
-                                                                                    @if ($comment->replies->count() > 0)
-                                                                                    <button class="btn btn-link btn-sm view-replies-btn" data-comment-id="{{ $comment->comment_id }}">
-                                                                                        View <span class="reply-count">{{ $comment->replies->count() }}</span> {{ Str::plural('reply', $comment->replies->count()) }}
-                                                                                        <i class="fas fa-chevron-down"></i>
-                                                                                    </button>
-                                                                                    
-                                                                                        <!-- Replies container -->
-                                                                                        <div class="replies-list d-none">
+                                                                                    <div class="comment"
+                                                                                        id="comment-{{ $comment->comment_id }}">
+                                                                                        <button
+                                                                                            class="btn btn-link btn-sm reply-btn"
+                                                                                            data-comment-id="{{ $comment->comment_id }}">Reply</button>
+
+                                                                                        <!-- Hidden reply form -->
+                                                                                        <div class="reply-form d-none">
+                                                                                            <form
+                                                                                                class="reply-form d-flex justify-content-end"
+                                                                                                method="POST">
+                                                                                                @csrf
+                                                                                                <input type="hidden"
+                                                                                                    name="post_id"
+                                                                                                    value="{{ $post->user_post_id }}">
+                                                                                                <input type="hidden"
+                                                                                                    name="parent_id"
+                                                                                                    value="{{ $comment->comment_id }}">
+                                                                                                <input type="text"
+                                                                                                    class="form-control me-2"
+                                                                                                    name="content"
+                                                                                                    placeholder="Add a reply..."
+                                                                                                    required>
+                                                                                                <button
+                                                                                                    class="btn btn-primary me-2"
+                                                                                                    type="submit">Reply</button>
+                                                                                                <button type="button"
+                                                                                                    class="btn btn-secondary cancel-reply">Cancel</button>
+                                                                                            </form>
+                                                                                        </div>
+
+
+                                                                                        <div
+                                                                                            class="replies-container mt-2">
+                                                                                            @if ($comment->replies->count() > 0)
+                                                                                                <button
+                                                                                                    class="btn btn-link btn-sm view-replies-btn"
+                                                                                                    data-comment-id="{{ $comment->comment_id }}">
+                                                                                                    View <span
+                                                                                                        class="reply-count">{{ $comment->replies->count() }}</span>
+                                                                                                    {{ Str::plural('reply', $comment->replies->count()) }}
+                                                                                                    <i
+                                                                                                        class="fas fa-chevron-down"></i>
+                                                                                                </button>
+
+                                                                                                 <!-- Replies container -->
+                                                                                            <div
+                                                                                            class="replies-list d-none">
                                                                                             @foreach ($comment->replies as $reply)
-                                                                                                <div class="comment d-flex mb-2 p-2 border-bottom" id="reply-{{ $reply->comment_id }}">
-                                                                                                    <img src="{{ $reply->user->profile_picture ? '/storage/' . $reply->user->profile_picture : '/assets-user/img/none-profile.jpg' }}" alt="User" class="rounded-circle small-img">
-                                                                                                    <div class="ms-2 flex-grow-1">
-                                                                                                        <div class="d-flex justify-content-between">
+                                                                                                <div class="comment d-flex mb-2 p-2 border-bottom"
+                                                                                                    id="reply-{{ $reply->comment_id }}">
+                                                                                                    <img src="{{ $reply->user->profile_picture ? '/storage/' . $reply->user->profile_picture : '/assets-user/img/none-profile.jpg' }}"
+                                                                                                        alt="User"
+                                                                                                        class="rounded-circle small-img">
+                                                                                                    <div
+                                                                                                        class="ms-2 flex-grow-1">
+                                                                                                        <div
+                                                                                                            class="d-flex justify-content-between">
                                                                                                             <div>
                                                                                                                 <strong>{{ $reply->user->username }}</strong>
-                                                                                                                <div class="text-muted"  style="font-size:13px;">
+                                                                                                                <div class="text-muted"
+                                                                                                                    style="font-size:13px;">
                                                                                                                     @php
-                                                                                                                        $createdAt = $reply->created_at;
+                                                                                                                        $createdAt =
+                                                                                                                            $reply->created_at;
                                                                                                                         $now = \Carbon\Carbon::now();
                                                                                                                         $oneDayAgo = $now->subDay();
                                                                                                                     @endphp
-                                                                                        
+
                                                                                                                     @if ($createdAt->lessThanOrEqualTo($oneDayAgo))
                                                                                                                         {{ $createdAt->format('F j, Y') }}
                                                                                                                     @else
-                                                                                                                        {{ $createdAt->format('F j, Y') }}, {{ $createdAt->diffForHumans() }}
+                                                                                                                        {{ $createdAt->format('F j, Y') }},
+                                                                                                                        {{ $createdAt->diffForHumans() }}
                                                                                                                     @endif
                                                                                                                 </div>
                                                                                                             </div>
                                                                                                             <div>
-                                                                                                                <button class="btn btn-link btn-sm more-options-btn" data-bs-toggle="dropdown" aria-expanded="false">
-                                                                                                                    <i class="fa-solid fa-ellipsis"></i>
-                                                                                                                </button>
-                                                                                                                <ul class="dropdown-menu dropdown-menu-end">
-                                                                                                                    <li><a class="dropdown-item edit-reply-btn" href="#" data-reply-id="{{ $reply->comment_id }}" data-comment-id="{{ $comment->comment_id }}"><i class="fas fa-edit"></i> Edit</a></li>
-                                                                                                                    <li><a class="dropdown-item delete-reply-btn" href="#" data-reply-id="{{ $reply->comment_id }}" data-comment-id="{{ $comment->comment_id }}"><i class="fas fa-trash"></i> Delete</a></li>
-                                                                                                                </ul>
+                                                                                                                @if (auth()->id() === $reply->user_id || auth()->id() === $comment->user_id)
+                                                                                                                    <button
+                                                                                                                        class="btn btn-link btn-sm more-options-btn"
+                                                                                                                        data-bs-toggle="dropdown"
+                                                                                                                        aria-expanded="false">
+                                                                                                                        <i
+                                                                                                                            class="fa-solid fa-ellipsis"></i>
+                                                                                                                    </button>
+                                                                                                                    <ul
+                                                                                                                        class="dropdown-menu dropdown-menu-end">
+                                                                                                                        @if (auth()->id() === $reply->user_id)
+                                                                                                                            <li>
+                                                                                                                                <a class="dropdown-item edit-reply-btn"
+                                                                                                                                    href="#"
+                                                                                                                                    data-reply-id="{{ $reply->comment_id }}"
+                                                                                                                                    data-comment-id="{{ $comment->comment_id }}">
+                                                                                                                                    <i
+                                                                                                                                        class="fas fa-edit"></i>
+                                                                                                                                    Edit
+                                                                                                                                </a>
+                                                                                                                            </li>
+                                                                                                                        @endif
+                                                                                                                        @if (auth()->id() === $reply->user_id || auth()->id() === $comment->user_id)
+                                                                                                                            <li>
+                                                                                                                                <a class="dropdown-item delete-reply-btn"
+                                                                                                                                    href="#"
+                                                                                                                                    data-reply-id="{{ $reply->comment_id }}"
+                                                                                                                                    data-comment-id="{{ $comment->comment_id }}">
+                                                                                                                                    <i
+                                                                                                                                        class="fas fa-trash"></i>
+                                                                                                                                    Delete
+                                                                                                                                </a>
+                                                                                                                            </li>
+                                                                                                                        @endif
+                                                                                                                    </ul>
+                                                                                                                @endif
                                                                                                             </div>
                                                                                                         </div>
-                                                                                                        <p class="mb-1 reply-content">{{ $reply->content }}</p>
-                                                                                                        <div class="edit-reply-form d-none">
-                                                                                                            <form method="POST" action="{{ route('comments.updateReply', ['comment' => $comment->comment_id, 'reply' => $reply->comment_id]) }}" class="d-flex align-items-center">
+                                                                                                        <p
+                                                                                                            class="mb-1 reply-content">
+                                                                                                            {{ $reply->content }}
+                                                                                                        </p>
+                                                                                                        <div
+                                                                                                            class="edit-reply-form d-none">
+                                                                                                            <form
+                                                                                                                method="POST"
+                                                                                                                action="{{ route('comments.updateReply', ['comment' => $comment->comment_id, 'reply' => $reply->comment_id]) }}"
+                                                                                                                class="d-flex align-items-center">
                                                                                                                 @csrf
                                                                                                                 @method('PUT')
-                                                                                                                <input type="text" class="form-control me-2" name="content" value="{{ $reply->content }}" required>
-                                                                                                                <button class="btn btn-primary btn-sm me-2" type="submit">Save</button>
-                                                                                                                <button type="button" class="btn btn-secondary btn-sm cancel-edit-btn">Cancel</button>
+                                                                                                                <input
+                                                                                                                    type="text"
+                                                                                                                    class="form-control me-2"
+                                                                                                                    name="content"
+                                                                                                                    value="{{ $reply->content }}"
+                                                                                                                    required>
+                                                                                                                <button
+                                                                                                                    class="btn btn-primary btn-sm me-2"
+                                                                                                                    type="submit">Save</button>
+                                                                                                                <button
+                                                                                                                    type="button"
+                                                                                                                    class="btn btn-secondary btn-sm cancel-edit-btn">Cancel</button>
                                                                                                             </form>
+                                                                                                                </div>
+                                                                                                            </div>
                                                                                                         </div>
-                                                                                                    </div>
+                                                                                                    @endforeach
                                                                                                 </div>
-                                                                                            @endforeach
+                                                                                            @endif
                                                                                         </div>
-                                                                                    @endif
-                                                                                </div>
-                                                                                
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-                                                                    @endforeach
-                                                                </div>
 
-                                                            <!-- Add Comment Form -->
-                                                            <div class="mt-3">
-                                                                <form method="POST"
-                                                                    action="{{ route('comments.store') }}"
-                                                                    class="d-flex mt-3 comment-form"
-                                                                    data-comment-url="{{ route('comments.store') }}">
-                                                                    @csrf
-                                                                    <input type="hidden" name="post_id"
-                                                                        value="{{ $post->user_post_id }}">
-                                                                    <input type="text"
-                                                                        class="form-control me-2" name="content"
-                                                                        placeholder="Add a comment..." required>
-                                                                    <button class="btn btn-primary"
-                                                                        type="submit">Comment</button>
-                                                                </form>
-                                                            </div>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        @endforeach
+                                                                    </div>
+
+                                                                    <!-- Add Comment Form -->
+                                                                    <div class="mt-3">
+                                                                        <form method="POST"
+                                                                            action="{{ route('comments.store') }}"
+                                                                            class="d-flex mt-3 comment-form"
+                                                                            data-comment-url="{{ route('comments.store') }}">
+                                                                            @csrf
+                                                                            <input type="hidden" name="post_id"
+                                                                                value="{{ $post->user_post_id }}">
+                                                                            <input type="text"
+                                                                                class="form-control me-2"
+                                                                                name="content"
+                                                                                placeholder="Add a comment..."
+                                                                                required>
+                                                                            <button class="btn btn-primary"
+                                                                                type="submit">Comment</button>
+                                                                        </form>
+                                                                    </div>
                                                                 </div>
                                                             </div>
                                                         </div>
                                                     </div>
                                             @endif
                                         @endforeach
+
+                                        @if ($posts->isNotEmpty())
+                                            <script>
+                                                var userId = @json(Auth::id());
+                                                var postOwnerId = @json($posts->first()->user_id);
+                                            </script>
+                                        @endif
+                                    @else
+                                        <div class="alert alert-info text-center">No posts to display.</div>
                                     @endif
                                 </div>
                             </div>
@@ -516,10 +610,6 @@
     <script src="../../assets-user/js/delete-comment.js"></script>
     <script src="../../assets-user/js/reply.js"></script>
     <script>
-        var userId = @json(Auth::id());
-        var postOwnerId = @json($post->user_id);
-    </script>
-    <script>
         window.csrfToken = '{{ csrf_token() }}';
         window.httpMethod = 'PUT';
     </script>
@@ -555,4 +645,5 @@
         });
     </script>
 </body>
+
 </html>

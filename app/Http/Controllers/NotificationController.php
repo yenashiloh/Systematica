@@ -37,7 +37,6 @@ class NotificationController extends Controller
         ]);
     }
     
-
     public function markAllAsRead()
     {
         $userId = Auth::id();
@@ -46,4 +45,6 @@ class NotificationController extends Controller
         
         return response()->json(['success' => true]);
     }
+
+    
 }

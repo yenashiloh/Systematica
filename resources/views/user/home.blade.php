@@ -11,12 +11,6 @@
     <link href="../assets-user/css/comment.css" rel="stylesheet">
     @include('partials.links')
 </head>
-<style>
-    .d-none {
-    display: none !important;
-}
-</style>
-
 <body>
 
     <!-- ======= Header ======= -->
@@ -94,10 +88,8 @@
                 <h1 class="mb-3">Posts</h1>
 
                 <div class="col-lg-12">
-                    @if ($posts->isEmpty())
-                        {{-- <div class="alert alert-info">No posts to display.</div> --}}
-                    @else
-                        @foreach ($posts as $post)
+                    @if ($posts->isNotEmpty())
+                    @foreach ($posts as $post)
                             <div class="card">
                                 <div class="card-body">
                                     <!-- Post Header -->
@@ -364,9 +356,9 @@
                                                                                 </div>
                                                                             </div>
                                                                         </div>
-                                                                    @endforeach
+                                                                        @endforeach
                                                                 </div>
-                                                            @endif
+                                                                @endif
                                                         </div>
                                                         
                                                     </div>
@@ -392,8 +384,17 @@
                                     </div>
                                 </div>
                             </div>
-                        @endforeach
-                    @endif
+                            @endforeach
+
+                            @if ($posts->isNotEmpty())
+                                <script>
+                                    var userId = @json(Auth::id());
+                                    var postOwnerId = @json($posts->first()->user_id);
+                                </script>
+                            @endif
+                        @else
+                            <div class="alert alert-info text-center">No posts to display.</div>
+                        @endif
                 </div>
 
 
@@ -506,10 +507,7 @@
     <script src="../assets-user/js/unfollow.js"></script>
     <script src="../assets-user/js/delete-comment.js"></script>
     <script src="../assets-user/js/reply.js"></script>
-    <script>
-        var userId = @json(Auth::id());
-        var postOwnerId = @json($post->user_id);
-    </script>
+   
     <script>
         window.csrfToken = '{{ csrf_token() }}';
         window.httpMethod = 'PUT';

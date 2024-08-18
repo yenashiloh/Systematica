@@ -37,7 +37,6 @@ Route::middleware(['auth'])->group(function () {
     Route::post('user/update-profile', [ProfileController::class, 'updateProfile'])->name('user.update-profile');
     Route::get('user/profile-user/{id}', [ProfileController::class, 'viewProfileUSer'])->name('user.profile-user');
     
-
     //Comments
     Route::post('/comments', [CommentController::class, 'store'])->name('comments.store'); //store comments
     Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy');
@@ -54,10 +53,6 @@ Route::middleware(['auth'])->group(function () {
 
     Route::put('/comments/{comment}/replies/{reply}', [CommentController::class, 'updateReply'])->name('comments.updateReply');
     Route::delete('/comments/{comment}/replies/{reply}', [CommentController::class, 'destroyReply']);
-
-
-
-    
 
     //Notifications
     Route::get('/notifications', [CommentController::class, 'showNotifications'])->name('notifications');

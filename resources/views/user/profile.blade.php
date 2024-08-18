@@ -65,7 +65,7 @@
                                             <!-- BEGIN profile-header-info -->
                                             <div class="profile-header-info">
                                                 <h4 class="name-user" style="font-weight:bold;">
-                                                    <span class="username-background" >
+                                                    <span class="username-background">
                                                         {{ $userDetails->username }}
                                                     </span>
                                                 </h4>
@@ -151,9 +151,7 @@
                                     </button>
 
                                     <div class="col-lg-12">
-                                        @if ($posts->isEmpty())
-                                            {{-- <div class="alert alert-info">No posts to display.</div> --}}
-                                        @else
+                                        @if ($posts->isNotEmpty())
                                             @foreach ($posts as $post)
                                                 <div class="card">
                                                     <div class="card-body">
@@ -353,7 +351,7 @@
                                                                                 <div class="edit-form d-none"
                                                                                     id="edit-form-{{ $comment->comment_id }}">
                                                                                     <form method="POST"
-                                                                                        action="{{ url('comments.update', $comment->comment_id) }}"
+                                                                                        action="{{ route('comments.update', $comment->comment_id) }}"
                                                                                         class="d-flex mt-3 edit-comment-form"
                                                                                         enctype="multipart/form-data">
                                                                                         @csrf
@@ -453,30 +451,42 @@
                                                                                                                     </div>
                                                                                                                 </div>
                                                                                                                 <div>
-                                                                                                                    <button
-                                                                                                                        class="btn btn-link btn-sm more-options-btn"
-                                                                                                                        data-bs-toggle="dropdown"
-                                                                                                                        aria-expanded="false">
-                                                                                                                        <i
-                                                                                                                            class="fa-solid fa-ellipsis"></i>
-                                                                                                                    </button>
-                                                                                                                    <ul
-                                                                                                                        class="dropdown-menu dropdown-menu-end">
-                                                                                                                        <li><a class="dropdown-item edit-reply-btn"
-                                                                                                                                href="#"
-                                                                                                                                data-reply-id="{{ $reply->comment_id }}"
-                                                                                                                                data-comment-id="{{ $comment->comment_id }}"><i
-                                                                                                                                    class="fas fa-edit"></i>
-                                                                                                                                Edit</a>
-                                                                                                                        </li>
-                                                                                                                        <li><a class="dropdown-item delete-reply-btn"
-                                                                                                                                href="#"
-                                                                                                                                data-reply-id="{{ $reply->comment_id }}"
-                                                                                                                                data-comment-id="{{ $comment->comment_id }}"><i
-                                                                                                                                    class="fas fa-trash"></i>
-                                                                                                                                Delete</a>
-                                                                                                                        </li>
-                                                                                                                    </ul>
+                                                                                                                    @if (auth()->id() === $reply->user_id || auth()->id() === $comment->user_id)
+                                                                                                                        <button
+                                                                                                                            class="btn btn-link btn-sm more-options-btn"
+                                                                                                                            data-bs-toggle="dropdown"
+                                                                                                                            aria-expanded="false">
+                                                                                                                            <i
+                                                                                                                                class="fa-solid fa-ellipsis"></i>
+                                                                                                                        </button>
+                                                                                                                        <ul
+                                                                                                                            class="dropdown-menu dropdown-menu-end">
+                                                                                                                            @if (auth()->id() === $reply->user_id)
+                                                                                                                                <li>
+                                                                                                                                    <a class="dropdown-item edit-reply-btn"
+                                                                                                                                        href="#"
+                                                                                                                                        data-reply-id="{{ $reply->comment_id }}"
+                                                                                                                                        data-comment-id="{{ $comment->comment_id }}">
+                                                                                                                                        <i
+                                                                                                                                            class="fas fa-edit"></i>
+                                                                                                                                        Edit
+                                                                                                                                    </a>
+                                                                                                                                </li>
+                                                                                                                            @endif
+                                                                                                                            @if (auth()->id() === $reply->user_id || auth()->id() === $comment->user_id)
+                                                                                                                                <li>
+                                                                                                                                    <a class="dropdown-item delete-reply-btn"
+                                                                                                                                        href="#"
+                                                                                                                                        data-reply-id="{{ $reply->comment_id }}"
+                                                                                                                                        data-comment-id="{{ $comment->comment_id }}">
+                                                                                                                                        <i
+                                                                                                                                            class="fas fa-trash"></i>
+                                                                                                                                        Delete
+                                                                                                                                    </a>
+                                                                                                                                </li>
+                                                                                                                            @endif
+                                                                                                                        </ul>
+                                                                                                                    @endif
                                                                                                                 </div>
                                                                                                             </div>
                                                                                                             <p
@@ -539,130 +549,131 @@
                                                     </div>
                                                 </div>
                                             @endforeach
+
+                                            @if ($posts->isNotEmpty())
+                                                <script>
+                                                    var userId = @json(Auth::id());
+                                                    var postOwnerId = @json($posts->first()->user_id);
+                                                </script>
+                                            @endif
+                                        @else
+                                            <div class="alert alert-info text-center">No posts to display.</div>
                                         @endif
                                     </div>
-                                </div>
 
-                                <!-- end profile -->
-                                <!-- begin profile-content -->
-                                <div class="profile-content">
-                                    <!-- begin tab-content -->
-                                    <div class="tab-content p-0">
-                                        <!-- begin #profile-post tab -->
-                                        <div class="tab-pane fade active show" id="profile-post">
-                                            <!-- begin timeline -->
+                                    <!-- Edit Post Modal -->
+                                    <div class="modal fade" id="editPostModal" tabindex="-1"
+                                        aria-labelledby="editPostModalLabel" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <form id="editPostForm" action="" method="POST"
+                                                    enctype="multipart/form-data">
+                                                    @csrf
+                                                    @method('PUT')
 
-                                        </div>
-                                        <!-- end #profile-post tab -->
-                                    </div>
-                                    <!-- end tab-content -->
-                                </div>
-                                <!-- end profile-content -->
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-
-                <!-- Edit Post Modal -->
-                <div class="modal fade" id="editPostModal" tabindex="-1" aria-labelledby="editPostModalLabel"
-                    aria-hidden="true">
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-                            <form id="editPostForm" action="" method="POST" enctype="multipart/form-data">
-                                @csrf
-                                @method('PUT')
-
-                                <!-- Modal Header -->
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="editPostModalLabel">Edit Post</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                        aria-label="Close"></button>
-                                </div>
-
-                                <!-- Modal Body -->
-                                <div class="modal-body" style="max-height: 400px; overflow-y: auto;">
-                                    <!-- Profile Picture, Name, and Privacy Setting -->
-                                    <div class="d-flex align-items-center mb-3">
-                                        <img src="{{ auth()->user()->profile_picture ? asset('storage/' . auth()->user()->profile_picture) : asset('assets-user/img/none-profile.jpg') }}"
-                                            alt="Profile Picture" class="rounded-circle-profile"
-                                            style="width: 50px; height: 50px; object-fit: cover;">
-
-                                        <div class="ms-3">
-                                            <div class="fw-bold mt-3" id="userName"></div>
-                                            <div class="position-relative">
-                                                <span
-                                                    id="privacyDisplay">{{ isset($post) ? $post->privacy : 'Public' }}</span>
-                                                <i class="fa fa-caret-down" id="privacyIcon"
-                                                    style="cursor: pointer; padding: 5px; display: inline-block;"></i>
-                                                <div class="dropdown-menu" id="privacyDropdown"
-                                                    style="display: none; position: absolute; top: 100%; left: 0; min-width: 300px;">
-                                                    <div class="p-2 fw-bold" style="margin-left: 13px;">Who can see
-                                                        your post?</div>
-                                                    <div
-                                                        class="form-check d-flex justify-content-between align-items-center">
-                                                        <label class="form-check-label me-2" for="public"><i
-                                                                class="fas fa-globe"></i> Public</label>
-                                                        <input class="form-check-input" style="margin-right: 20px;"
-                                                            type="radio" name="privacy" id="public"
-                                                            value="Public">
+                                                    <!-- Modal Header -->
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title" id="editPostModalLabel">Edit Post</h5>
+                                                        <button type="button" class="btn-close"
+                                                            data-bs-dismiss="modal" aria-label="Close"></button>
                                                     </div>
-                                                    <div
-                                                        class="form-check d-flex justify-content-between align-items-center">
-                                                        <label class="form-check-label me-2" for="friends"><i
-                                                                class="fas fa-user-friends"></i> Friends</label>
-                                                        <input class="form-check-input" style="margin-right: 20px;"
-                                                            type="radio" name="privacy" id="friends"
-                                                            value="Friends">
+
+                                                    <!-- Modal Body -->
+                                                    <div class="modal-body"
+                                                        style="max-height: 400px; overflow-y: auto;">
+                                                        <!-- Profile Picture, Name, and Privacy Setting -->
+                                                        <div class="d-flex align-items-center mb-3">
+                                                            <img src="{{ auth()->user()->profile_picture ? asset('storage/' . auth()->user()->profile_picture) : asset('assets-user/img/none-profile.jpg') }}"
+                                                                alt="Profile Picture" class="rounded-circle-profile"
+                                                                style="width: 50px; height: 50px; object-fit: cover;">
+
+                                                            <div class="ms-3">
+                                                                <div class="fw-bold mt-3" id="userName"></div>
+                                                                <div class="position-relative">
+                                                                    <span
+                                                                        id="privacyDisplay">{{ isset($post) ? $post->privacy : 'Public' }}</span>
+                                                                    <i class="fa fa-caret-down" id="privacyIcon"
+                                                                        style="cursor: pointer; padding: 5px; display: inline-block;"></i>
+                                                                    <div class="dropdown-menu" id="privacyDropdown"
+                                                                        style="display: none; position: absolute; top: 100%; left: 0; min-width: 300px;">
+                                                                        <div class="p-2 fw-bold"
+                                                                            style="margin-left: 13px;">Who can
+                                                                            see
+                                                                            your post?</div>
+                                                                        <div
+                                                                            class="form-check d-flex justify-content-between align-items-center">
+                                                                            <label class="form-check-label me-2"
+                                                                                for="public"><i
+                                                                                    class="fas fa-globe"></i>
+                                                                                Public</label>
+                                                                            <input class="form-check-input"
+                                                                                style="margin-right: 20px;"
+                                                                                type="radio" name="privacy"
+                                                                                id="public" value="Public">
+                                                                        </div>
+                                                                        <div
+                                                                            class="form-check d-flex justify-content-between align-items-center">
+                                                                            <label class="form-check-label me-2"
+                                                                                for="friends"><i
+                                                                                    class="fas fa-user-friends"></i>
+                                                                                Friends</label>
+                                                                            <input class="form-check-input"
+                                                                                style="margin-right: 20px;"
+                                                                                type="radio" name="privacy"
+                                                                                id="friends" value="Friends">
+                                                                        </div>
+                                                                        <div
+                                                                            class="form-check d-flex justify-content-between align-items-center">
+                                                                            <label class="form-check-label me-2"
+                                                                                for="onlyMe"><i
+                                                                                    class="fas fa-lock"></i> Only
+                                                                                Me</label>
+                                                                            <input class="form-check-input"
+                                                                                style="margin-right: 20px;"
+                                                                                type="radio" name="privacy"
+                                                                                id="onlyMe" value="Only Me">
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <!-- Caption Textarea -->
+                                                        <div class="mb-3">
+                                                            <textarea class="form-control caption" id="caption" name="caption" required placeholder="What's on your mind?"
+                                                                style="border:none; font-size: 16px; padding: 10px; background-color: rgb(255, 255, 255);">{{ old('caption', isset($post) ? $post->caption : '') }}</textarea>
+                                                        </div>
+
+                                                        <!-- Upload Photo Button -->
+                                                        <div class="mb-3 position-relative">
+                                                            <input type="file" id="fileInput" name="image"
+                                                                accept="image/*" style="display: none;">
+                                                            <button type="button"
+                                                                class="btn btn-light position-absolute start-0"
+                                                                id="uploadPhotoButton"
+                                                                style="margin-top: 5px; margin-left:5px;">
+                                                                <i class="fas fa-plus-circle"></i> Add photos
+                                                            </button>
+                                                        </div>
+
+                                                        <!-- Image Preview -->
+                                                        <img id="postImagePreview"
+                                                            src="{{ isset($post) && $post->image ? asset('storage/' . $post->image) : '' }}"
+                                                            alt="Post Image" class="img-fluid mt-2"
+                                                            style="max-height: 300px; object-fit: cover; {{ isset($post) && $post->image ? '' : 'display: none;' }}">
                                                     </div>
-                                                    <div
-                                                        class="form-check d-flex justify-content-between align-items-center">
-                                                        <label class="form-check-label me-2" for="onlyMe"><i
-                                                                class="fas fa-lock"></i> Only Me</label>
-                                                        <input class="form-check-input" style="margin-right: 20px;"
-                                                            type="radio" name="privacy" id="onlyMe"
-                                                            value="Only Me">
+
+                                                    <!-- Modal Footer -->
+                                                    <div class="modal-footer">
+                                                        <button type="submit" class="btn btn-primary w-100">Save
+                                                            changes</button>
                                                     </div>
-                                                </div>
+                                                </form>
                                             </div>
                                         </div>
                                     </div>
-
-                                    <!-- Caption Textarea -->
-                                    <div class="mb-3">
-                                        <textarea class="form-control caption" id="caption" name="caption" required placeholder="What's on your mind?"
-                                            style="border:none; font-size: 16px; padding: 10px; background-color: rgb(255, 255, 255);">{{ old('caption', isset($post) ? $post->caption : '') }}</textarea>
-                                    </div>
-
-                                    <!-- Upload Photo Button -->
-                                    <div class="mb-3 position-relative">
-                                        <input type="file" id="fileInput" name="image" accept="image/*"
-                                            style="display: none;">
-                                        <button type="button" class="btn btn-light position-absolute start-0"
-                                            id="uploadPhotoButton" style="margin-top: 5px; margin-left:5px;">
-                                            <i class="fas fa-plus-circle"></i> Add photos
-                                        </button>
-                                    </div>
-
-                                    <!-- Image Preview -->
-                                    <img id="postImagePreview"
-                                        src="{{ isset($post) && $post->image ? asset('storage/' . $post->image) : '' }}"
-                                        alt="Post Image" class="img-fluid mt-2"
-                                        style="max-height: 300px; object-fit: cover; {{ isset($post) && $post->image ? '' : 'display: none;' }}">
-                                </div>
-
-                                <!-- Modal Footer -->
-                                <div class="modal-footer">
-                                    <button type="submit" class="btn btn-primary w-100">Save changes</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-
-
-            </section>
-        </main><!-- End #main -->
+                            </section>
+                        </main><!-- End #main -->
 
 
         <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i
@@ -673,11 +684,7 @@
         <script src="../assets-user/js/user-post.js"></script>
         <script src="../assets-user/js/delete-comment.js"></script>
         <script src="../assets-user/js/reply.js"></script>
-
-        <script>
-            var userId = @json(Auth::id());
-            var postOwnerId = @json($post->user_id);
-        </script>
+        <script src="../../assets-user/js/unfollow.js"></script>
         <script>
             window.csrfToken = '{{ csrf_token() }}';
             window.httpMethod = 'PUT';
